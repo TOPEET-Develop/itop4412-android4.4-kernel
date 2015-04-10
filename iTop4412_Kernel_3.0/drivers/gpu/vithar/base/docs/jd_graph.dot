@@ -1,0 +1,33 @@
+digraph G {
+	size="5,5";
+	node [shape=record]
+	ndep [label = "No dep", shape = plaintext ]
+
+	ndep -> b [label = 0, style=dashed]
+	ndep -> e [label = 0, style=dashed]
+	ndep -> e [label = 0, style=dashed]
+	ndep -> d [label = 0, style=dashed]
+	ndep -> f [label = 0, style=dashed]
+	ndep -> f [label = 0, style=dashed]
+	ndep -> c [label = 0, style=dashed]
+
+	subgraph cluster0 {
+		style=filled;
+		color=lightgrey;
+		label="Bag"
+
+		{ rank = same; e; f }
+		{ rank = same; b; c; d }
+
+		n -> a [label = 6]
+		b -> a [label = 7]
+		d -> n [label = 4]
+		c -> n [label = 5]
+		f -> d [label = 3]
+		e -> c [label = 2]
+		e -> b [label = 1]
+	}
+
+	a -> "whatever" [label=8]
+}
+

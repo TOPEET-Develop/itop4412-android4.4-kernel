@@ -1,0 +1,40 @@
+digraph G {
+	size="7,7";
+	rankdir=LR;
+	compound=true;
+	node [shape=record];
+	subgraph cluster_rb {
+		labeljust = r;
+		label = "ring-buffer";
+		subgraph cluster0 {
+			label = "Bag #0";
+			structe [label = "{ <x>Payload e | { pre-deps = [0:0] | post-deps = [1:2] } | Syncset[] e }"];
+			structf [label = "{ Payload f | { pre-deps = [0:0] | post-deps = [3:0] } | Syncset[] f }"];
+			structc [label = "{ Payload c | { pre-deps = [2:0] | post-deps = [5:0] } | Syncset[] c }"];
+			structd [label = "{ Payload d | { pre-deps = [3:0] | post-deps = [4:0] } | Syncset[] d }"];
+			structn [label = "{ Payload n | { pre-deps = [5:4] | post-deps = [0:6] } | Syncset[] n }"];
+			structb [label = "{ Payload b | { pre-deps = [0:1] | post-deps = [7:0] } | Syncset[] b }"];
+			structa [label = "{ Payload a | { pre-deps = [7:6] | post-deps = [8:0] } | Syncset[] a }"];
+		}
+		subgraph cluster1 {
+			label = "Bag#1";
+			structx [label = "{ <x>Payload x | { pre-deps = [8:0] | post-deps = [9:10] } | Syncset[] x }"];
+		 	structy [label = "{ Payload y | { pre-deps = [9:0] | post-deps = [0:0] } | Syncset[] y }"];
+		 	structz [label = "{ Payload z | { pre-deps = [10:0] | post-deps = [0:0] } | Syncset[] z }"];
+		}
+		subgraph cluster2 {
+			label = "Bag#2";
+			structw [label = "{ <x>... | { ... | ... } | ... }"];
+			structv [label = ".\n.\n.\n"];
+		}
+	}
+
+	bag0 [label = "struct jd_bag #0"];
+	bag1 [label = "struct jd_bag #1"];
+	bag2 [label = "struct jd_bag #2"];
+
+	bag0 -> structe:x:nw [lhead=cluster0]
+	bag1 -> structx:x:nw [lhead=cluster1]
+	bag2 -> structw:x:nw [lhead=cluster2]
+}
+

@@ -1,0 +1,61 @@
+#
+# Near Field Communication (NFC) devices
+#
+
+menuconfig NFC_DEVICES
+	bool "Near Field Communication (NFC) devices"
+	default y
+	---help---
+	  You'll have to say Y if your computer contains an NFC device that
+	  you want to use under Linux.
+
+	  You can say N here if you don't have any Near Field Communication
+	  devices connected to your computer.
+
+if NFC_DEVICES
+
+config PN544_NFC
+	tristate "PN544 NFC driver"
+	depends on I2C
+	select CRC_CCITT
+	default n
+	---help---
+	  Say yes if you want PN544 Near Field Communication driver.
+	  This is for i2c connected version. If unsure, say N here.
+
+	  To compile this driver as a module, choose m here. The module will
+	  be called pn544.
+
+config S3FHRN2
+	bool "Samsung NFC S3FHRN2 driver"
+	depends on I2C
+	default y
+	---help---
+	  You'll have to say Y if your system contains S3FHRN2 of SAMSUNG
+	  NFC device.
+
+	  This is for I2C or UART connected version. If unsure, say N here.
+
+choice
+	prompt "NFC Interface"
+	depends on S3FHRN2
+	default S3FHRN2_I2C
+
+config S3FHRN2_I2C
+	bool "I2C Interface"
+
+config S3FHRN2_UART
+	bool "UART Interface"
+endchoice
+
+config S3FHRN2_I2C_GPIO
+	bool "With Bit Bang Algorithm"
+	depends on S3FHRN2_I2C
+	select I2C_ALGOBIT
+	default n
+	---help---
+	  Say yes if you want use Bit Bang Algorithm without I2C controller
+
+	  This is for smdk4x12 board. If unsure, say N here.
+
+endif # NFC_DEVICES

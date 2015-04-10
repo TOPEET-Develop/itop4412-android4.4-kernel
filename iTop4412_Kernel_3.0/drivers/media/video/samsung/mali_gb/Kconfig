@@ -1,0 +1,56 @@
+#
+## S3C Multimedia Mali configuration
+##
+#
+# For Mali
+config GB_VIDEO_MALI400MP
+	bool "Enable MALI integration"
+	depends on (VIDEO_SAMSUNG && TC4_GB)
+	default y 
+	---help---
+                This enables MALI integration in the multimedia device driver
+
+choice
+depends on GB_VIDEO_MALI400MP
+prompt "MALI MEMORY OPTION"
+default GB_MALI_OSMEM_ONLY 
+config GB_MALI_DED_ONLY
+  bool "mali dedicated memory only"
+   ---help---
+       This enables MALI dedicated memory only option
+config GB_MALI_DED_MMU
+  bool "mali dedicated memory with mmu enable"
+   ---help---
+       This enables MALI dedicated memory with mmu enable option
+config GB_MALI_OSMEM_ONLY
+   bool "mali OS memory only"
+   ---help---
+       This enables MALI OS memory only option
+config GB_MALI_DED_OSMEM
+   bool "mali dedicated memory and OS memory"
+   ---help---
+       This enables MALI dedicated memory and OS memory option
+
+endchoice
+config GB_MALI_MEM_SIZE
+int "Dedicated Memory Size"
+   depends on GB_VIDEO_MALI400MP && (GB_MALI_DED_ONLY || GB_MALI_DED_MMU || GB_MALI_DED_OSMEM)
+   default "128"
+   ---help---
+       This value is dedicated memory size of Mali GPU(unit is MByte).
+
+
+# For DEBUG
+config GB_VIDEO_MALI400MP_DEBUG
+	bool "Enables debug messages"
+	depends on GB_VIDEO_MALI400MP
+	default n
+	help
+	  This enables Mali driver debug messages.
+
+config GB_VIDEO_MALI400MP_DVFS
+	bool "Enables DVFS"
+	depends on GB_VIDEO_MALI400MP && PM 
+	default y
+	help
+	  This enables Mali driver DVFS.

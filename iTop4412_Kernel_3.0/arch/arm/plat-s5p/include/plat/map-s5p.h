@@ -1,0 +1,94 @@
+/* linux/arch/arm/plat-s5p/include/plat/map-s5p.h
+ *
+ * Copyright (c) 2010 Samsung Electronics Co., Ltd.
+ *		http://www.samsung.com/
+ *
+ * S5P - Memory map definitions
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+*/
+
+#ifndef __ASM_PLAT_MAP_S5P_H
+#define __ASM_PLAT_MAP_S5P_H __FILE__
+
+#define S5P_VA_CHIPID		S3C_ADDR(0x02000000)
+#define S5P_VA_CMU		S3C_ADDR(0x02100000)
+#define S5P_VA_PMU		S3C_ADDR(0x02180000)
+#define S5P_VA_GPIO		S3C_ADDR(0x02200000)
+#define S5P_VA_GPIO1		S5P_VA_GPIO
+#define S5P_VA_GPIO2		S3C_ADDR(0x02240000)
+#define S5P_VA_GPIO3		S3C_ADDR(0x02280000)
+#define S5P_VA_GPIO4		S3C_ADDR(0x022C0000)
+
+#define S5P_VA_SYSRAM		S3C_ADDR(0x02400000)
+#define S5P_VA_SYSRAM_NS	S3C_ADDR(0x02410000)
+#define S5P_VA_DMC0		S3C_ADDR(0x02440000)
+#define S5P_VA_DMC1		S3C_ADDR(0x02480000)
+#define S5P_VA_SROMC		S3C_ADDR(0x024C0000)
+
+#define S5P_VA_SYSTIMER		S3C_ADDR(0x02500000)
+#define S5P_VA_L2CC		S3C_ADDR(0x02600000)
+
+#define S5P_VA_COMBINER_BASE	S3C_ADDR(0x02700000)
+#define S5P_VA_COMBINER(x)	(S5P_VA_COMBINER_BASE + ((x) >> 2) * 0x10)
+
+#define S5P_VA_COREPERI_BASE	S3C_ADDR(0x02800000)
+#define S5P_VA_COREPERI(x)	(S5P_VA_COREPERI_BASE + (x))
+#define S5P_VA_SCU		S5P_VA_COREPERI(0x0)
+#define S5P_VA_TWD		S5P_VA_COREPERI(0x600)
+
+#define S5P_VA_GIC_CPU		S3C_ADDR(0x02810000)
+#define S5P_VA_GIC_DIST		S3C_ADDR(0x02820000)
+
+#define S3C_VA_USB_HSPHY	S3C_ADDR(0x02900000)
+
+#define S5P_VA_AUDSS		S3C_ADDR(0x02910000)
+
+#define S5P_VA_PPMU_DMC0	S3C_ADDR(0x02930000)
+#define S5P_VA_PPMU_DMC1	S3C_ADDR(0x02932000)
+#define S5P_VA_PPMU_CPU		S3C_ADDR(0x02934000)
+#define S5P_VA_PPMU_DDR_C	S3C_ADDR(0x02936000)
+#define S5P_VA_PPMU_DDR_R1	S3C_ADDR(0x02938000)
+#define S5P_VA_PPMU_DDR_L	S3C_ADDR(0x0293a000)
+#define S5P_VA_PPMU_RIGHT0_BUS	S3C_ADDR(0x0293c000)
+
+#define S5P_VA_SS_PHY		S3C_ADDR(0x02A00000)
+#define S5P_VA_FIMCLITE0	S3C_ADDR(0x02A10000)
+#define S5P_VA_MIPICSI0		S3C_ADDR(0x02A20000)
+
+#define VA_VIC(x)		(S3C_VA_IRQ + ((x) * 0x10000))
+#define VA_VIC0			VA_VIC(0)
+#define VA_VIC1			VA_VIC(1)
+#define VA_VIC2			VA_VIC(2)
+#define VA_VIC3			VA_VIC(3)
+
+#define S5P_VA_UART(x)		(S3C_VA_UART + ((x) * S3C_UART_OFFSET))
+#define S5P_VA_UART0		S5P_VA_UART(0)
+#define S5P_VA_UART1		S5P_VA_UART(1)
+#define S5P_VA_UART2		S5P_VA_UART(2)
+#define S5P_VA_UART3		S5P_VA_UART(3)
+
+#ifndef S3C_UART_OFFSET
+#define S3C_UART_OFFSET		(0x400)
+#endif
+//Robin, porting from 2.6.35, for sysmmu&g2d
+#define S5P_MMU_CTRL		(0x000)
+#define S5P_MMU_CFG		(0x004)
+#define S5P_MMU_STATUS		(0x008)
+#define S5P_MMU_FLUSH		(0x00C)
+#define S5P_MMU_FLUSH_ENTRY	(0x010)
+#define S5P_PT_BASE_ADDR	(0x014)
+#define S5P_INT_STATUS		(0x018)
+#define S5P_INT_CLEAR		(0x01C)
+#define S5P_INT_MASK		(0x020)
+#define S5P_PAGE_FAULT_ADDR	(0x024)
+#define S5P_AW_FAULT_ADDR	(0x028)
+#define S5P_AR_FAULT_ADDR	(0x02C)
+#define S5P_DEFAULT_SLAVE_ADDR	(0x030)
+#define S5P_MMU_VERSION		(0x034)
+#define S5P_TLB_READ            (0x038)
+#define S5P_TLB_DATA            (0x03C)
+//end
+#endif /* __ASM_PLAT_MAP_S5P_H */

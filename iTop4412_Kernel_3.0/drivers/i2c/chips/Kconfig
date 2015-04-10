@@ -1,0 +1,13 @@
+#
+# Miscellaneous I2C chip drivers configuration
+#
+
+menu "Miscellaneous I2C Chip support"
+
+config SENSOR_ROHM_BH1721
+	tristate "Rohm BH1721 Light Sensor"
+	depends on EXPERIMENTAL
+	help
+	  If you say yes here you get support for Rohm BH1721 Light Sensor.
+
+endmenu

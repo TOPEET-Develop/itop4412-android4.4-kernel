@@ -1,0 +1,21 @@
+# This confidential and proprietary software may be used only as
+# authorised by a licensing agreement from ARM Limited
+# (C) COPYRIGHT 2010-2011 ARM Limited
+# ALL RIGHTS RESERVED
+# The entire notice above must be reproduced on all authorised
+# copies and copies may only be made to the extent permitted
+# by a licensing agreement from ARM Limited.
+
+Import( 'env' )
+
+# Each platform sconscript file for Base just returns a value for the list of
+# platform sources, relative to this directory
+
+if env['os'] == 'android':
+    plat_srcs = File(['mali_base_plat_channels_android.c', 'mali_base_plat_channels_config_android.c'])
+else:
+    # Assumes Linux, or linux compatible (stdio)
+    plat_srcs = File(['mali_base_plat_channels_linux.c', 'mali_base_plat_channels_config_linux.c'])
+
+
+Return( 'plat_srcs' )

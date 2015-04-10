@@ -1,0 +1,61 @@
+# This confidential and proprietary software may be used only as
+# authorised by a licensing agreement from ARM Limited
+# (C) COPYRIGHT 2010-2011 ARM Limited
+# ALL RIGHTS RESERVED
+# The entire notice above must be reproduced on all authorised
+# copies and copies may only be made to the extent permitted
+# by a licensing agreement from ARM Limited.
+
+Import( 'env' )
+
+import sys
+
+# Fetch the names of the platform specific sources
+base_plat_srcs = SConscript( '../platform_%s/sconscript' % env['platform'] )
+
+if env['os'] == 'linux' or env['os'] == 'android' or env['os'] == 'osx':
+	if env['hw'] == '2':
+		kbase_arch_source = 'mali_base_kbase_lk.c'
+		kbase_dep = []
+	else:
+		kbase_arch_source = 'mali_base_kbase_lu.c'
+		kbase_dep = ['kbase', 'osk']
+else:
+	sys.stderr.write("Unsupported OS: %s\n" % env['os']);
+	Exit(1)
+
+# All modules that use base on Linux are going to need the Linux pthread library
+env.AppendUnique(
+	LIBS=["pthread"]
+)
+
+if env['base_qa'] =='1':
+	extra_src = ['mali_base_mem_track.c']
+else:
+	extra_src = []
+	
+	
+
+if env['unit'] == '1':	
+    #make a local definition for STATIC
+	new_cppdefines = dict(env['CPPDEFINES'])
+	new_cppdefines.update( {'STATIC':''} )
+	
+	libs=env.StaticLibrary( 
+				target = '$STATIC_LIB_PATH/base', 
+				source = extra_src + ['mali_base_context.c', 'mali_base_jd_u.c', 'mali_base_gpuprops.c', 'mali_base_channels.c', 'mali_base_channels_utils.c', 'mali_base_debug.c', 'mali_base_kbase.c', kbase_arch_source, base_plat_srcs],
+				CPPDEFINES = new_cppdefines
+				)
+else:
+	libs=env.StaticLibrary( 
+			target = '$STATIC_LIB_PATH/base', 
+			source = ['mali_base_context.c', 'mali_base_jd_u.c', 'mali_base_gpuprops.c', 'mali_base_channels.c', 'mali_base_channels_utils.c', 'mali_base_debug.c', 'mali_base_kbase.c', kbase_arch_source, base_plat_srcs],
+			)
+
+env.LibTarget('base', libs)
+
+env.AppendUnique(BASE=['base', 'uku'])
+env.AppendUnique(BASE=kbase_dep)
+
+if env['os'] == 'android':
+	env.AppendUnique(BASE=['log'])

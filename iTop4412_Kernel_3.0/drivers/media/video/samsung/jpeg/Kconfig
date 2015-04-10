@@ -1,0 +1,15 @@
+#
+# Configuration for JPEG
+#
+
+config VIDEO_JPEG
+	bool "Samsung JPEG_v2.x driver"
+	depends on (VIDEO_SAMSUNG && TC4_GB )
+	default n
+	---help---
+	  This is a JPEG for Samsung S5PV210 or S5PV310
+
+config VIDEO_JPEG_DEBUG
+	bool "print JPEG debug message"
+	depends on VIDEO_JPEG
+	default n

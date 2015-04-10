@@ -1,0 +1,48 @@
+# This confidential and proprietary software may be used only as
+# authorised by a licensing agreement from ARM Limited
+# (C) COPYRIGHT 2010-2011 ARM Limited
+# ALL RIGHTS RESERVED
+# The entire notice above must be reproduced on all authorised
+# copies and copies may only be made to the extent permitted
+# by a licensing agreement from ARM Limited.
+
+Import( 'env' )
+
+import sys
+import os
+
+if env['os'] == 'linux' or env['os'] == 'android' or env['os'] == 'osx':
+	if env['hw'] == '2':
+		ump = 'ump'
+	else:
+		ump = ''
+else:
+	sys.stderr.write("Unsupported OS: %s\n" % env['os']);
+	Exit(1)
+
+# All modules that use base on Linux are going to need the Linux pthread library
+env.AppendUnique(
+	LIBS=["pthread"]
+)
+
+ump='ump'
+
+reqlibs = ['$LIBS', '$BASE', ump, 'cutils_ring_buffer','cdbg','cutils_cstr','cutils_list','stdlib_${platform}','utf','tpi','osu']
+if int(env['instr']) == 2:
+	reqlibs += ['cinstr', 'cmem', 'cutils_dict']
+
+plist = []
+if env['hw'] == '2':
+	plist.append(env.Program('$UNITTEST_PROGS_PATH/mali_base_ump_test',
+                             ['ump/mali_base_ump_test.c'],
+                             LIBPATH=['$STATIC_LIB_PATH'],
+                             LIBS=reqlibs))
+plist.append(env.Program('$UNITTEST_PROGS_PATH/mali_base_map_test_quick',
+                              ['memory/mali_base_map_test_quick.c'],
+                             LIBPATH=['$STATIC_LIB_PATH'],
+                             LIBS=reqlibs))
+plist.append(env.Program('$UNITTEST_PROGS_PATH/mali_base_jd_test',
+                             ['jobdispatch/mali_base_jd_test.c'],
+                             LIBPATH=['$STATIC_LIB_PATH'],
+                             LIBS=reqlibs))                                                     
+env.ProgTarget('base', plist)

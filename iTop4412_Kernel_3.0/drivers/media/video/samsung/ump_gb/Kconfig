@@ -1,0 +1,52 @@
+
+#
+## S3C Multimedia Mali configuration
+##
+#
+# For UMP
+config GB_VIDEO_UMP
+	bool "Enable UMP(Unified Memory Provider)"
+	depends on (VIDEO_SAMSUNG  && TC4_GB)
+	default y
+	---help---
+		This enables UMP memory provider
+
+config GB_UMP_VCM_ALLOC
+	depends on GB_VIDEO_UMP && VCM
+	default y
+        bool "Enable ump-vcm(virtual contiguous memory) memory"
+        help
+          Use VCM(virtual-contiguous-memory) to allocate physical memory.
+
+choice
+depends on GB_VIDEO_UMP
+prompt "UMP MEMEMORY OPTION"
+default GB_UMP_VCM_ONLY
+config GB_UMP_DED_ONLY
+  bool "ump dedicated memory only"
+   ---help---
+       This enables UMP dedicated memory only option
+config GB_UMP_OSMEM_ONLY
+   bool "ump OS memory only"
+   ---help---
+       This enables UMP OS memory only option
+config GB_UMP_VCM_ONLY
+   bool "ump VCM memory"
+   ---help---
+       This enables UMP VCM memory only option
+
+endchoice
+config GB_UMP_MEM_SIZE
+int "UMP Memory Size"
+   depends on GB_VIDEO_UMP 
+   default "64"
+   ---help---
+       This value is dedicated memory size of UMP (unit is MByte).
+# For UMP_DEBUG
+config GB_VIDEO_UMP_DEBUG
+	bool "Enables debug messages"
+	depends on GB_VIDEO_UMP
+	default n
+	help
+	  This enables UMP driver debug messages.
+

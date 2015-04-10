@@ -1,0 +1,276 @@
+
+mtk_wmt_wifi.o:     file format elf32-littlearm
+
+Disassembly of section .text:
+
+00000000 <WIFI_close>:
+   0:	e1a0c00d 	mov	ip, sp
+   4:	e92dd800 	push	{fp, ip, lr, pc}
+   8:	e24cb004 	sub	fp, ip, #4	; 0x4
+   c:	e24dd008 	sub	sp, sp, #8	; 0x8
+  10:	e59f3060 	ldr	r3, [pc, #96]	; 78 <WIFI_close+0x78>
+  14:	e5933000 	ldr	r3, [r3]
+  18:	e3530001 	cmp	r3, #1	; 0x1
+  1c:	8a000005 	bhi	38 <WIFI_close+0x38>
+  20:	e59f2054 	ldr	r2, [pc, #84]	; 7c <WIFI_close+0x7c>
+  24:	e3a03000 	mov	r3, #0	; 0x0
+  28:	e1a00003 	mov	r0, r3
+  2c:	e5823000 	str	r3, [r2]
+  30:	e24bd00c 	sub	sp, fp, #12	; 0xc
+  34:	e89da800 	ldm	sp, {fp, sp, pc}
+  38:	e1a0100d 	mov	r1, sp
+  3c:	e5903074 	ldr	r3, [r0, #116]
+  40:	e3c12d7f 	bic	r2, r1, #8128	; 0x1fc0
+  44:	e59f1034 	ldr	r1, [pc, #52]	; 80 <WIFI_close+0x80>
+  48:	e3c2203f 	bic	r2, r2, #63	; 0x3f
+  4c:	e3c3c4ff 	bic	ip, r3, #-16777216	; 0xff000000
+  50:	e3ccc60f 	bic	ip, ip, #15728640	; 0xf00000
+  54:	e58dc000 	str	ip, [sp]
+  58:	e592c00c 	ldr	ip, [r2, #12]
+  5c:	e1a03a23 	lsr	r3, r3, #20
+  60:	e1a02001 	mov	r2, r1
+  64:	e59f0018 	ldr	r0, [pc, #24]	; 84 <WIFI_close+0x84>
+  68:	e59cc128 	ldr	ip, [ip, #296]
+  6c:	e58dc004 	str	ip, [sp, #4]
+  70:	ebfffffe 	bl	0 <printk>
+  74:	eaffffe9 	b	20 <WIFI_close+0x20>
+	...
+
+00000088 <WIFI_open>:
+  88:	e1a0c00d 	mov	ip, sp
+  8c:	e92dd800 	push	{fp, ip, lr, pc}
+  90:	e24cb004 	sub	fp, ip, #4	; 0x4
+  94:	e24dd008 	sub	sp, sp, #8	; 0x8
+  98:	e59f3054 	ldr	r3, [pc, #84]	; f4 <WIFI_open+0x6c>
+  9c:	e5933000 	ldr	r3, [r3]
+  a0:	e3530001 	cmp	r3, #1	; 0x1
+  a4:	8a000002 	bhi	b4 <WIFI_open+0x2c>
+  a8:	e3a00000 	mov	r0, #0	; 0x0
+  ac:	e24bd00c 	sub	sp, fp, #12	; 0xc
+  b0:	e89da800 	ldm	sp, {fp, sp, pc}
+  b4:	e1a0100d 	mov	r1, sp
+  b8:	e5903074 	ldr	r3, [r0, #116]
+  bc:	e3c12d7f 	bic	r2, r1, #8128	; 0x1fc0
+  c0:	e59f1030 	ldr	r1, [pc, #48]	; f8 <WIFI_open+0x70>
+  c4:	e3c2203f 	bic	r2, r2, #63	; 0x3f
+  c8:	e3c3c4ff 	bic	ip, r3, #-16777216	; 0xff000000
+  cc:	e3ccc60f 	bic	ip, ip, #15728640	; 0xf00000
+  d0:	e58dc000 	str	ip, [sp]
+  d4:	e592c00c 	ldr	ip, [r2, #12]
+  d8:	e1a03a23 	lsr	r3, r3, #20
+  dc:	e1a02001 	mov	r2, r1
+  e0:	e59f0014 	ldr	r0, [pc, #20]	; fc <WIFI_open+0x74>
+  e4:	e59cc128 	ldr	ip, [ip, #296]
+  e8:	e58dc004 	str	ip, [sp, #4]
+  ec:	ebfffffe 	bl	0 <printk>
+  f0:	eaffffec 	b	a8 <WIFI_open+0x20>
+  f4:	00000000 	.word	0x00000000
+  f8:	0000000c 	.word	0x0000000c
+  fc:	00000000 	.word	0x00000000
+
+00000100 <cleanup_module>:
+ 100:	e1a0c00d 	mov	ip, sp
+ 104:	e92dd830 	push	{r4, r5, fp, ip, lr, pc}
+ 108:	e24cb004 	sub	fp, ip, #4	; 0x4
+ 10c:	e59f4040 	ldr	r4, [pc, #64]	; 154 <cleanup_module+0x54>
+ 110:	e3a03000 	mov	r3, #0	; 0x0
+ 114:	e59f003c 	ldr	r0, [pc, #60]	; 158 <cleanup_module+0x58>
+ 118:	e5945004 	ldr	r5, [r4, #4]
+ 11c:	e4803004 	str	r3, [r0], #4
+ 120:	ebfffffe 	bl	0 <cdev_del>
+ 124:	e3a01001 	mov	r1, #1	; 0x1
+ 128:	e1a05a05 	lsl	r5, r5, #20
+ 12c:	e1a00005 	mov	r0, r5
+ 130:	ebfffffe 	bl	0 <unregister_chrdev_region>
+ 134:	e5943000 	ldr	r3, [r4]
+ 138:	e3530001 	cmp	r3, #1	; 0x1
+ 13c:	989da830 	ldmls	sp, {r4, r5, fp, sp, pc}
+ 140:	e59f1014 	ldr	r1, [pc, #20]	; 15c <cleanup_module+0x5c>
+ 144:	e59f2014 	ldr	r2, [pc, #20]	; 160 <cleanup_module+0x60>
+ 148:	e59f0014 	ldr	r0, [pc, #20]	; 164 <cleanup_module+0x64>
+ 14c:	ebfffffe 	bl	0 <printk>
+ 150:	e89da830 	ldm	sp, {r4, r5, fp, sp, pc}
+	...
+ 15c:	00000018 	.word	0x00000018
+ 160:	00000054 	.word	0x00000054
+ 164:	00000030 	.word	0x00000030
+
+00000168 <init_module>:
+ 168:	e1a0c00d 	mov	ip, sp
+ 16c:	e92dd8f0 	push	{r4, r5, r6, r7, fp, ip, lr, pc}
+ 170:	e24cb004 	sub	fp, ip, #4	; 0x4
+ 174:	e59f60c0 	ldr	r6, [pc, #192]	; 23c <init_module+0xd4>
+ 178:	e3a01001 	mov	r1, #1	; 0x1
+ 17c:	e59f20bc 	ldr	r2, [pc, #188]	; 240 <init_module+0xd8>
+ 180:	e5967004 	ldr	r7, [r6, #4]
+ 184:	e1a07a07 	lsl	r7, r7, #20
+ 188:	e1a00007 	mov	r0, r7
+ 18c:	ebfffffe 	bl	0 <register_chrdev_region>
+ 190:	e2505000 	subs	r5, r0, #0	; 0x0
+ 194:	1a00001e 	bne	214 <init_module+0xac>
+ 198:	e59f40a4 	ldr	r4, [pc, #164]	; 244 <init_module+0xdc>
+ 19c:	e2861008 	add	r1, r6, #8	; 0x8
+ 1a0:	e2840004 	add	r0, r4, #4	; 0x4
+ 1a4:	ebfffffe 	bl	0 <cdev_init>
+ 1a8:	e59f3098 	ldr	r3, [pc, #152]	; 248 <init_module+0xe0>
+ 1ac:	e2840004 	add	r0, r4, #4	; 0x4
+ 1b0:	e1a01007 	mov	r1, r7
+ 1b4:	e3a02001 	mov	r2, #1	; 0x1
+ 1b8:	e5843028 	str	r3, [r4, #40]
+ 1bc:	ebfffffe 	bl	0 <cdev_add>
+ 1c0:	e3500000 	cmp	r0, #0	; 0x0
+ 1c4:	1a00000d 	bne	200 <init_module+0x98>
+ 1c8:	e5962000 	ldr	r2, [r6]
+ 1cc:	e284304c 	add	r3, r4, #76	; 0x4c
+ 1d0:	e5845040 	str	r5, [r4, #64]
+ 1d4:	e3520001 	cmp	r2, #1	; 0x1
+ 1d8:	e5843050 	str	r3, [r4, #80]
+ 1dc:	e3a02001 	mov	r2, #1	; 0x1
+ 1e0:	e5845044 	str	r5, [r4, #68]
+ 1e4:	e5842048 	str	r2, [r4, #72]
+ 1e8:	e584304c 	str	r3, [r4, #76]
+ 1ec:	8a00000c 	bhi	224 <init_module+0xbc>
+ 1f0:	e3a03000 	mov	r3, #0	; 0x0
+ 1f4:	e5843000 	str	r3, [r4]
+ 1f8:	e1a00005 	mov	r0, r5
+ 1fc:	e89da8f0 	ldm	sp, {r4, r5, r6, r7, fp, sp, pc}
+ 200:	e1a00007 	mov	r0, r7
+ 204:	e3a01001 	mov	r1, #1	; 0x1
+ 208:	ebfffffe 	bl	0 <unregister_chrdev_region>
+ 20c:	e3e05000 	mvn	r5, #0	; 0x0
+ 210:	eafffff8 	b	1f8 <init_module+0x90>
+ 214:	e59f1030 	ldr	r1, [pc, #48]	; 24c <init_module+0xe4>
+ 218:	e59f0030 	ldr	r0, [pc, #48]	; 250 <init_module+0xe8>
+ 21c:	ebfffffe 	bl	0 <printk>
+ 220:	eafffff4 	b	1f8 <init_module+0x90>
+ 224:	e5963004 	ldr	r3, [r6, #4]
+ 228:	e59f101c 	ldr	r1, [pc, #28]	; 24c <init_module+0xe4>
+ 22c:	e59f200c 	ldr	r2, [pc, #12]	; 240 <init_module+0xd8>
+ 230:	e59f001c 	ldr	r0, [pc, #28]	; 254 <init_module+0xec>
+ 234:	ebfffffe 	bl	0 <printk>
+ 238:	eaffffec 	b	1f0 <init_module+0x88>
+ 23c:	00000000 	.word	0x00000000
+ 240:	00000054 	.word	0x00000054
+	...
+ 24c:	00000024 	.word	0x00000024
+ 250:	00000068 	.word	0x00000068
+ 254:	00000090 	.word	0x00000090
+
+00000258 <WIFI_write>:
+ 258:	e1a0c00d 	mov	ip, sp
+ 25c:	e92dd870 	push	{r4, r5, r6, fp, ip, lr, pc}
+ 260:	e24cb004 	sub	fp, ip, #4	; 0x4
+ 264:	e24dd00c 	sub	sp, sp, #12	; 0xc
+ 268:	e59f5198 	ldr	r5, [pc, #408]	; 408 <WIFI_write+0x1b0>
+ 26c:	e1a04002 	mov	r4, r2
+ 270:	e3a03000 	mov	r3, #0	; 0x0
+ 274:	e1a06001 	mov	r6, r1
+ 278:	e2850040 	add	r0, r5, #64	; 0x40
+ 27c:	e50b3020 	str	r3, [fp, #-32]
+ 280:	ebfffffe 	bl	0 <down>
+ 284:	e3540000 	cmp	r4, #0	; 0x0
+ 288:	1a000005 	bne	2a4 <WIFI_write+0x4c>
+ 28c:	e3e04004 	mvn	r4, #4	; 0x4
+ 290:	e59f0174 	ldr	r0, [pc, #372]	; 40c <WIFI_write+0x1b4>
+ 294:	ebfffffe 	bl	0 <up>
+ 298:	e1a00004 	mov	r0, r4
+ 29c:	e24bd018 	sub	sp, fp, #24	; 0x18
+ 2a0:	e89da870 	ldm	sp, {r4, r5, r6, fp, sp, pc}
+ 2a4:	e1a0200d 	mov	r2, sp
+ 2a8:	e3c23d7f 	bic	r3, r2, #8128	; 0x1fc0
+ 2ac:	e3540004 	cmp	r4, #4	; 0x4
+ 2b0:	31a02004 	movcc	r2, r4
+ 2b4:	23a02004 	movcs	r2, #4	; 0x4
+ 2b8:	e3c3303f 	bic	r3, r3, #63	; 0x3f
+ 2bc:	e5933008 	ldr	r3, [r3, #8]
+ 2c0:	e0961002 	adds	r1, r6, r2
+ 2c4:	30d11003 	sbcscc	r1, r1, r3
+ 2c8:	33a03000 	movcc	r3, #0	; 0x0
+ 2cc:	e3530000 	cmp	r3, #0	; 0x0
+ 2d0:	0a000015 	beq	32c <WIFI_write+0xd4>
+ 2d4:	e3520000 	cmp	r2, #0	; 0x0
+ 2d8:	1a000019 	bne	344 <WIFI_write+0xec>
+ 2dc:	e59f612c 	ldr	r6, [pc, #300]	; 410 <WIFI_write+0x1b8>
+ 2e0:	e5963000 	ldr	r3, [r6]
+ 2e4:	e3530001 	cmp	r3, #1	; 0x1
+ 2e8:	8a000041 	bhi	3f4 <WIFI_write+0x19c>
+ 2ec:	e55b3020 	ldrb	r3, [fp, #-32]
+ 2f0:	e3530030 	cmp	r3, #48	; 0x30
+ 2f4:	1a000017 	bne	358 <WIFI_write+0x100>
+ 2f8:	e5953054 	ldr	r3, [r5, #84]
+ 2fc:	e3530001 	cmp	r3, #1	; 0x1
+ 300:	1affffe1 	bne	28c <WIFI_write+0x34>
+ 304:	e3a00003 	mov	r0, #3	; 0x3
+ 308:	ebfffffe 	bl	0 <mtk_wcn_wmt_func_off>
+ 30c:	e3500000 	cmp	r0, #0	; 0x0
+ 310:	0a000023 	beq	3a4 <WIFI_write+0x14c>
+ 314:	e5963000 	ldr	r3, [r6]
+ 318:	e3530001 	cmp	r3, #1	; 0x1
+ 31c:	8a000030 	bhi	3e4 <WIFI_write+0x18c>
+ 320:	e3a03000 	mov	r3, #0	; 0x0
+ 324:	e5853054 	str	r3, [r5, #84]
+ 328:	eaffffd8 	b	290 <WIFI_write+0x38>
+ 32c:	e1a01006 	mov	r1, r6
+ 330:	e24b0020 	sub	r0, fp, #32	; 0x20
+ 334:	ebfffffe 	bl	0 <__copy_from_user>
+ 338:	e3500000 	cmp	r0, #0	; 0x0
+ 33c:	1affffd2 	bne	28c <WIFI_write+0x34>
+ 340:	eaffffe5 	b	2dc <WIFI_write+0x84>
+ 344:	e1a01002 	mov	r1, r2
+ 348:	e24b0020 	sub	r0, fp, #32	; 0x20
+ 34c:	ebfffffe 	bl	0 <__memzero>
+ 350:	e3e04004 	mvn	r4, #4	; 0x4
+ 354:	eaffffcd 	b	290 <WIFI_write+0x38>
+ 358:	e3530031 	cmp	r3, #49	; 0x31
+ 35c:	1affffca 	bne	28c <WIFI_write+0x34>
+ 360:	e5953054 	ldr	r3, [r5, #84]
+ 364:	e3530000 	cmp	r3, #0	; 0x0
+ 368:	1affffc7 	bne	28c <WIFI_write+0x34>
+ 36c:	e3a00003 	mov	r0, #3	; 0x3
+ 370:	ebfffffe 	bl	0 <mtk_wcn_wmt_func_on>
+ 374:	e3500000 	cmp	r0, #0	; 0x0
+ 378:	0a000011 	beq	3c4 <WIFI_write+0x16c>
+ 37c:	e5963000 	ldr	r3, [r6]
+ 380:	e3a01001 	mov	r1, #1	; 0x1
+ 384:	e59f207c 	ldr	r2, [pc, #124]	; 408 <WIFI_write+0x1b0>
+ 388:	e1530001 	cmp	r3, r1
+ 38c:	e5821054 	str	r1, [r2, #84]
+ 390:	9affffbe 	bls	290 <WIFI_write+0x38>
+ 394:	e59f1078 	ldr	r1, [pc, #120]	; 414 <WIFI_write+0x1bc>
+ 398:	e59f0078 	ldr	r0, [pc, #120]	; 418 <WIFI_write+0x1c0>
+ 39c:	ebfffffe 	bl	0 <printk>
+ 3a0:	eaffffba 	b	290 <WIFI_write+0x38>
+ 3a4:	e5963000 	ldr	r3, [r6]
+ 3a8:	e3530001 	cmp	r3, #1	; 0x1
+ 3ac:	9affffb6 	bls	28c <WIFI_write+0x34>
+ 3b0:	e59f105c 	ldr	r1, [pc, #92]	; 414 <WIFI_write+0x1bc>
+ 3b4:	e3e04004 	mvn	r4, #4	; 0x4
+ 3b8:	e59f005c 	ldr	r0, [pc, #92]	; 41c <WIFI_write+0x1c4>
+ 3bc:	ebfffffe 	bl	0 <printk>
+ 3c0:	eaffffb2 	b	290 <WIFI_write+0x38>
+ 3c4:	e5963000 	ldr	r3, [r6]
+ 3c8:	e3530000 	cmp	r3, #0	; 0x0
+ 3cc:	0affffae 	beq	28c <WIFI_write+0x34>
+ 3d0:	e59f103c 	ldr	r1, [pc, #60]	; 414 <WIFI_write+0x1bc>
+ 3d4:	e3e04004 	mvn	r4, #4	; 0x4
+ 3d8:	e59f0040 	ldr	r0, [pc, #64]	; 420 <WIFI_write+0x1c8>
+ 3dc:	ebfffffe 	bl	0 <printk>
+ 3e0:	eaffffaa 	b	290 <WIFI_write+0x38>
+ 3e4:	e59f1028 	ldr	r1, [pc, #40]	; 414 <WIFI_write+0x1bc>
+ 3e8:	e59f0034 	ldr	r0, [pc, #52]	; 424 <WIFI_write+0x1cc>
+ 3ec:	ebfffffe 	bl	0 <printk>
+ 3f0:	eaffffca 	b	320 <WIFI_write+0xc8>
+ 3f4:	e59f1018 	ldr	r1, [pc, #24]	; 414 <WIFI_write+0x1bc>
+ 3f8:	e55b2020 	ldrb	r2, [fp, #-32]
+ 3fc:	e59f0024 	ldr	r0, [pc, #36]	; 428 <WIFI_write+0x1d0>
+ 400:	ebfffffe 	bl	0 <printk>
+ 404:	eaffffb8 	b	2ec <WIFI_write+0x94>
+ 408:	00000000 	.word	0x00000000
+ 40c:	00000040 	.word	0x00000040
+ 410:	00000000 	.word	0x00000000
+ 414:	00000030 	.word	0x00000030
+ 418:	00000158 	.word	0x00000158
+ 41c:	000000e0 	.word	0x000000e0
+ 420:	00000130 	.word	0x00000130
+ 424:	00000108 	.word	0x00000108
+ 428:	000000c0 	.word	0x000000c0

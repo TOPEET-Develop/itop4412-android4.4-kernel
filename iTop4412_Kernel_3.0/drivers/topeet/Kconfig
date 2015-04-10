@@ -1,0 +1,13 @@
+menu "TOPEET COMPANY DECIDE CPU TYPE"
+#
+# COMBO chip configuration
+#
+config CPU_TYPE_SCP
+	bool "CPU type support 4412 SCP"
+	default y
+	help
+	  select cpu type, if select support 4412 SCP, 
+	  else support 4412 POP
+
+endmenu
+

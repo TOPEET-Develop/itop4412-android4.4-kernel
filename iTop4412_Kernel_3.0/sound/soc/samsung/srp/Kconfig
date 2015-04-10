@@ -1,0 +1,18 @@
+config SND_SAMSUNG_RP
+	bool "SRP Audio support via Internal DMA"
+	depends on SND_SOC_SAMSUNG_I2S_IDMA
+	default n
+	help
+	  Say Y if you want to add support for SRP Audio.
+
+config AUDIO_SAMSUNG_MEMSIZE_SRP
+	int "Memory size in kbytes for SRP Audio"
+	depends on SND_SAMSUNG_RP
+	default "1024"
+
+config SND_SAMSUNG_RP_DEBUG
+	bool "Enable debug message for SRP Audio"
+	depends on SND_SAMSUNG_RP
+	default n
+	help
+	  Say Y if you want to add debug message for SRP Audio.

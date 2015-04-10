@@ -1,0 +1,21 @@
+# Copyright:
+# ----------------------------------------------------------------------------
+# This confidential and proprietary software may be used only as authorized 
+# by a licensing agreement from ARM Limited.
+#      (C) COPYRIGHT 2010-2011 ARM Limited, ALL RIGHTS RESERVED
+# The entire notice above must be reproduced on all authorized copies and 
+# copies may only be made to the extent permitted by a licensing agreement
+# from ARM Limited.
+# ----------------------------------------------------------------------------
+#
+
+Import( 'env' )
+
+SConscript('docs/sconscript')
+
+if env['hw'] == '2' and Glob('platform_%s/sconscript' % env['platform']):
+	SConscript( 'platform_%s/sconscript' % env['platform'] )
+if Glob('tests/sconscript'):
+	SConscript('tests/sconscript')
+
+SConscript('src/sconscript')

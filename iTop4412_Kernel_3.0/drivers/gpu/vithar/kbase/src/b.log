@@ -1,0 +1,4 @@
+make -C /home/shkim/git-src/bluebird/android-kernel-samsung-dev M=/home/shkim/workspace/vithar/linux/TX011-BU-00000-r0p1-01bet0/driver/product/kbase/src KBUILD_EXTRA_SYMBOLS="/home/shkim/workspace/vithar/linux/TX011-BU-00000-r0p1-01bet0/driver/product/kbase/src/../../uk/src/ukk/linux/Module.symvers /home/shkim/workspace/vithar/linux/TX011-BU-00000-r0p1-01bet0/driver/product/kbase/src/../../ump/src/devicedrv/Module.symvers" modules
+make[1]: Entering directory `/home/shkim/git-src/bluebird/android-kernel-samsung-dev'
+  CC [M]  /home/shkim/workspace/vithar/linux/TX011-BU-00000-r0p1-01bet0/driver/product/kbase/src/common/mali_kbase_device.o
+make[1]: Leaving directory `/home/shkim/git-src/bluebird/android-kernel-samsung-dev'

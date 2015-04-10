@@ -1,0 +1,27 @@
+# This confidential and proprietary software may be used only as
+# authorised by a licensing agreement from ARM Limited
+# (C) COPYRIGHT 2010-2011 ARM Limited
+# ALL RIGHTS RESERVED
+# The entire notice above must be reproduced on all authorised
+# copies and copies may only be made to the extent permitted
+# by a licensing agreement from ARM Limited.
+
+Import( 'env' )
+
+sources = ['common/ump.c']
+
+if int( env['hw'] ) == 2:
+	sources.append( 'os/linux/ump_linux_mem.c' )
+else:
+	sources.append( 'os/linux_userspace/ump_linux_mem.c' )
+  
+if env['unit'] == '1':	
+    #make a local definition for STATIC
+	new_cppdefines = dict(env['CPPDEFINES'])
+	new_cppdefines.update( {'STATIC':''} )
+	
+	libs=env.StaticLibrary( '$STATIC_LIB_PATH/ump', sources, CPPDEFINES = new_cppdefines )
+else:
+	libs=env.StaticLibrary( '$STATIC_LIB_PATH/ump', sources )
+
+env.LibTarget('ump', libs)

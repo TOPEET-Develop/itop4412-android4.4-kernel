@@ -1,0 +1,35 @@
+# This confidential and proprietary software may be used only as
+# authorised by a licensing agreement from ARM Limited
+# (C) COPYRIGHT 2010-2011 ARM Limited
+# ALL RIGHTS RESERVED
+# The entire notice above must be reproduced on all authorised
+# copies and copies may only be made to the extent permitted
+# by a licensing agreement from ARM Limited.
+
+Import( 'env' )
+import os
+
+# All modules that use osu platform dummy on Linux are going to need the Linux pthread library
+env.AppendUnique(
+	LIBS=["pthread"]
+)
+
+libs=env.StaticLibrary( '$STATIC_LIB_PATH/osu', ['mali_osu.c', '../src/mali_osu_globals.c'] )
+
+env.LibTarget('osu', libs)
+
+if int( env[ 'unit' ] ):
+	new_cpp_defines = dict( env[ 'CPPDEFINES' ] )
+	new_cpp_defines.update( { 'MALI_UNIT_IMPOSTERS' : '1' } )
+	sources = ['mali_osu.c'] + ['./../src/mali_osu_globals.c']
+	sources_imposters = [ './../tests/internal/unit_tests/imposters/mali_base_osu_pthread_imposter.c' ] + \
+	                    [ './../tests/internal/unit_tests/imposters/mali_osu_unit_imposter_state.c' ] 
+	NEWCPPPATH = ['$CPPPATH', '#osu/tests/internal/unit_tests/']
+	# we need to mangle obj names not to cause conflict with regular version ones
+	objects = []
+	for source in sources:
+		#source = os.path.basename( str( source ) )
+		object = source.replace( '.c', '_imposter_variant' )
+		objects.append( env.Object( object, source, CPPDEFINES = new_cpp_defines, CPPPATH=NEWCPPPATH ) )
+
+	lib = env.StaticLibrary( '$UNITTEST_PROGS_PATH/osu-imposter-variant', objects + sources_imposters )
