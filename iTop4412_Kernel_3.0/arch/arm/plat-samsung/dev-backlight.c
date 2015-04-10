@@ -36,6 +36,9 @@ static int samsung_bl_init(struct device *dev)
 	/* Configure GPIO pin with specific GPIO function for PWM timer */
 	s3c_gpio_cfgpin(bl_gpio_info->no, bl_gpio_info->func);
 
+	/* add by cym 20150121 */
+	gpio_free(bl_gpio_info->no);
+	/* end add */
 	return 0;
 }
 
