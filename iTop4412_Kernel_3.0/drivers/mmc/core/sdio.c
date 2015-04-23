@@ -804,12 +804,20 @@ int mmc_attach_sdio(struct mmc_host *host)
 	err = mmc_send_io_op_cond(host, 0, &ocr);
  
 	if (err)
+        {
+            printk("---mmc_send_io_op_cond fail---\n");
 		return err;
+        }
  
+       printk("---mmc_send_io_op_cond OK---\n");
+
 	
 	mmc_attach_bus(host, &mmc_sdio_ops);
 	if (host->ocr_avail_sdio)
 		host->ocr_avail = host->ocr_avail_sdio;
+
+
+      printk("---mmc_attach_bus OK---\n");
 
 	/*
 	 * Sanity check the voltages that the card claims to
@@ -818,11 +826,13 @@ int mmc_attach_sdio(struct mmc_host *host)
 	if (ocr & 0x7F) {
 		printk(KERN_WARNING "%s: card claims to support voltages "
 		       "below the defined range. These will be ignored.\n",
-		       mmc_hostname(host));
+                       mmc_hostname(host));
 		ocr &= ~0x7F;
 	}
 
 	host->ocr = mmc_select_voltage(host, ocr);
+
+          printk("---mmc_select_voltage OK---\n");
 
 	/*
 	 * Can we support the voltage(s) of the card(s)?
@@ -837,7 +847,14 @@ int mmc_attach_sdio(struct mmc_host *host)
 	 */
 	err = mmc_sdio_init_card(host, host->ocr, NULL, 0);
 	if (err)
+        {
+                 printk("------mmc_sdio_init_card  fail------\n");
 		goto err;
+        }
+
+
+        printk("------mmc_sdio_init_card  OK------\n");
+
 	card = host->card;
 
 	/*
@@ -931,12 +948,15 @@ remove_added:
 	/* Remove without lock if the device has been added. */
 	mmc_sdio_remove(host);
 	mmc_claim_host(host);
+
+        printk("-----remove_added-----\n");
 remove:
 	/* And with lock if it hasn't been added. */
 	mmc_release_host(host);
 	if (host->card)
 		mmc_sdio_remove(host);
 	mmc_claim_host(host);
+        printk("-----remove-----\n");
 err:
 	mmc_detach_bus(host);
 

@@ -1088,6 +1088,8 @@ static void mmc_power_off(struct mmc_host *host)
 	mmc_host_clk_release(host);
 }
 
+
+
 /*
  * Cleanup when the last reference to the bus operator is dropped.
  */
@@ -1685,13 +1687,32 @@ static int mmc_rescan_try_freq(struct mmc_host *host, unsigned freq)
 
 	mmc_send_if_cond(host, host->ocr_avail);
 
-	/* Order's important: probe SDIO, then SD, then MMC */
-	if (!mmc_attach_sdio(host))
-			return 0;
+        /* Order's important: probe SDIO, then SD, then MMC */
+        if (!mmc_attach_sdio(host))
+        {
+            printk("XXXXXXXXX-mmc_attach_sdio--OK-----\n");
+                        return 0;
+        }
+
+
+         printk("XXXXXXXXX-mmc_attach_sdio--fail-----\n");
+
 	if (!mmc_attach_sd(host))
+        {
+             printk("XXXXXXXXX-mmc_attach_sd--OK-----\n");
 			return 0;
+        }
+
+          printk("XXXXXXXXX-mmc_attach_sd--fail-----\n");
+
 	if (!mmc_attach_mmc(host))
+        {
+
+             printk("XXXXXXXXX-mmc_attach_mmc--OK-----\n");
 			return 0;
+        }
+
+          printk("XXXXXXXXX-mmc_attach_mmc--fail-----\n");
 
 	mmc_power_off(host);
 	mmc_set_drv_state(e_inserting_damaged,host);

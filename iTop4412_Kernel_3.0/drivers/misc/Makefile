@@ -57,3 +57,8 @@ endif
 obj-$(CONFIG_SNFC)		+= pn544.o
 
 obj-$(CONFIG_SAMSUNG_C2C)	+= c2c/
+obj-$(CONFIG_MTK_WIRELESS_SOLUTION)	+= mediatek/
+
+
+
+

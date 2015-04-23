@@ -548,6 +548,7 @@ source "drivers/misc/iwmc3200top/Kconfig"
 source "drivers/misc/ti-st/Kconfig"
 source "drivers/misc/lis3lv02d/Kconfig"
 source "drivers/misc/carma/Kconfig"
+source "drivers/misc/mediatek/Kconfig"
 
 config TC4_PORTRAIT_MODE
 	bool "LCD portrait mode"
@@ -581,5 +582,7 @@ config SNFC_I2C_GPIO
 
 endchoice
 endif	# SNFC
+
+
 
 endif # MISC_DEVICES

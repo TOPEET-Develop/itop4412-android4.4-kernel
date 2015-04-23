@@ -2430,7 +2430,9 @@ static int check_modinfo(struct module *mod, struct load_info *info)
 #else
 #ifndef CONFIG_MTK_COMBO_COMM
 #ifndef CONFIG_MTK_COMBO_COMM_MODULE
-	return 0;
+#ifndef CONFIG_MTK_COMBO_MT66XX  //add by dg
+        return 0;
+#endif
 #endif
 #endif
 #endif

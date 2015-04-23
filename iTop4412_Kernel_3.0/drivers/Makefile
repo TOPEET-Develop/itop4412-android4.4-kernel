@@ -122,8 +122,4 @@ obj-y				+= ieee802154/
 #common clk code
 obj-y				+= clk/
 obj-$(CONFIG_HWSPINLOCK)	+= hwspinlock/
-
-#add by cym 20130301
-obj-$(CONFIG_MTK_COMBO)         += mtk_wcn_combo/
-#obj-y				+= topeet/
 #end add

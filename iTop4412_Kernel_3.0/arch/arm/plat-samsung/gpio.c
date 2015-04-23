@@ -16,7 +16,7 @@
 #include <linux/io.h>
 #include <linux/gpio.h>
 #include <linux/spinlock.h>
-#if defined(CONFIG_MTK_COMBO_COMM) || defined(CONFIG_MTK_COMBO_COMM_MODULE)	//add by cym 20130301
+#if defined(CONFIG_MTK_COMBO_COMM) || defined(CONFIG_MTK_COMBO_COMM_MODULE) || defined(CONFIG_MTK_COMBO_MT66XX)	//add by cym 20130301
 #include <linux/module.h>
 #endif
 
@@ -114,7 +114,7 @@ static void s3c_gpiolib_set(struct gpio_chip *chip,
 	s3c_gpio_unlock(ourchip, flags);
 }
 
-#if defined(CONFIG_MTK_COMBO_COMM) || defined(CONFIG_MTK_COMBO_COMM_MODULE)	//add by cym 20130301
+#if defined(CONFIG_MTK_COMBO_COMM) || defined(CONFIG_MTK_COMBO_COMM_MODULE) || defined(CONFIG_MTK_COMBO_MT66XX)	//add by cym 20130301
 int s3c_gpiolib_get(struct gpio_chip *chip, unsigned offset)
 #else
 static int s3c_gpiolib_get(struct gpio_chip *chip, unsigned offset)
@@ -129,7 +129,7 @@ static int s3c_gpiolib_get(struct gpio_chip *chip, unsigned offset)
 
 	return val;
 }
-#if defined(CONFIG_MTK_COMBO_COMM) || defined(CONFIG_MTK_COMBO_COMM_MODULE)	//add by cym 20130301
+#if defined(CONFIG_MTK_COMBO_COMM) || defined(CONFIG_MTK_COMBO_COMM_MODULE) || defined(CONFIG_MTK_COMBO_MT66XX)	//add by cym 20130301
 EXPORT_SYMBOL(s3c_gpiolib_get);
 #endif
 

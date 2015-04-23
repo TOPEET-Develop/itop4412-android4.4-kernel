@@ -37,7 +37,7 @@
 void mmc_valid(u16 valid, struct mmc_host *host);
 
 /* add by cym 20130328 */
-#if CONFIG_MTK_COMBO
+#if CONFIG_MTK_COMBO_MT66XX
 /* skip do suspend for mmc2 host. But it would fail because clock is stopped
  * but NOT restored automatically after resume.
  */
@@ -445,7 +445,7 @@ static struct sdhci_ops sdhci_s3c_ops = {
 	.get_cd			= sdhci_s3c_get_cd,//ly
 };
 
-void sdhci_init(struct sdhci_host *host, int soft);
+ void sdhci_init(struct sdhci_host *host, int soft);
 static void sdhci_s3c_notify_change(struct platform_device *dev, int state)
 {
 	struct sdhci_host *host = platform_get_drvdata(dev);
@@ -489,7 +489,10 @@ void sdhci_s3c_sdio_card_detect(struct platform_device *pdev)
         struct sdhci_host *host = platform_get_drvdata(pdev);
         //printk(KERN_DEBUG "+%s", __FUNCTION__);
         printk("+%s\n", __FUNCTION__);
-        mmc_detect_change(host->mmc, msecs_to_jiffies(60));
+    //    mmc_detect_change(host->mmc, msecs_to_jiffies(60));
+
+         mmc_detect_change(host->mmc, msecs_to_jiffies(500));
+
         //printk(KERN_DEBUG "-%s", __FUNCTION__);
         printk("-%s\n", __FUNCTION__);
 }

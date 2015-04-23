@@ -23,7 +23,7 @@
 #include <plat/gpio-cfg.h>
 #include <plat/gpio-cfg-helpers.h>
 
-#if defined(CONFIG_MTK_COMBO_COMM) || defined(CONFIG_MTK_COMBO_COMM_MODULE)	//add by cym 20130301
+#if defined(CONFIG_MTK_COMBO_COMM) || defined(CONFIG_MTK_COMBO_COMM_MODULE) || defined(CONFIG_MTK_COMBO_MT66XX)	//add by cym 20130301
 #include <linux/module.h>
 #endif
 
@@ -69,7 +69,7 @@ static int samsung_gpiolib_4bit_input(struct gpio_chip *chip,
 	return 0;
 }
 
-#if defined(CONFIG_MTK_COMBO_COMM) || defined(CONFIG_MTK_COMBO_COMM_MODULE)	//add by cym 20130301
+#if defined(CONFIG_MTK_COMBO_COMM) || defined(CONFIG_MTK_COMBO_COMM_MODULE) || defined(CONFIG_MTK_COMBO_MT66XX)	//add by cym 20130301
 int samsung_gpiolib_4bit_output(struct gpio_chip *chip,
 				       unsigned int offset, int value)
 #else
@@ -107,7 +107,7 @@ static int samsung_gpiolib_4bit_output(struct gpio_chip *chip,
 	return 0;
 }
 
-#if defined(CONFIG_MTK_COMBO_COMM) || defined(CONFIG_MTK_COMBO_COMM_MODULE)	//add by cym 20130301
+#if defined(CONFIG_MTK_COMBO_COMM) || defined(CONFIG_MTK_COMBO_COMM_MODULE) || defined(CONFIG_MTK_COMBO_MT66XX)	//add by cym 20130301
 EXPORT_SYMBOL(samsung_gpiolib_4bit_output);
 #endif
 

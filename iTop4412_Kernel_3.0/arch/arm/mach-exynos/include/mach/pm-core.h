@@ -49,11 +49,14 @@ static inline void s3c_pm_arch_prepare_irqs(void)
 #if 0
 	__raw_writel(s3c_irqwake_eintmask, S5P_EINT_WAKEUP_MASK);
 #else
-#if defined(CONFIG_MTK_COMBO_COMM) || defined(CONFIG_MTK_COMBO_COMM_MODULE)
+
+
+#if defined(CONFIG_MTK_COMBO_COMM) || defined(CONFIG_MTK_COMBO_COMM_MODULE) || defined(CONFIG_MTK_COMBO_MT66XX)
 	__raw_writel(s3c_irqwake_eintmask|(0x30<<16), S5P_EINT_WAKEUP_MASK); //mask EINT20 and EINT21
 #else
 	__raw_writel(s3c_irqwake_eintmask, S5P_EINT_WAKEUP_MASK);
 #endif
+
 #endif
 }
 
