@@ -44,15 +44,15 @@
 #define CONFIG_FT5X0X_MULTITOUCH		1
 #endif
 
-//#define TOUCH_MAX_X						0x700
-//#define TOUCH_MAX_Y						0x400
+//#define TOUCH_MAX_X						1024//0x700
+//#define TOUCH_MAX_Y						768//0x400
 int TOUCH_MAX_X = 1024;
 int TOUCH_MAX_Y = 768;
 
 static int swap_xy = 0;
 static int scal_xy = 0;
 
-//struct regulator *dc33v_tp = NULL;
+struct regulator *dc33v_tp = NULL;
 int touch_size = 0;	//0:1024*768 or 1:1280*800
 /*---------------------------------------------------------
  * Chip I/O operations
@@ -177,13 +177,13 @@ static int ft5x0x_read_fw_ver(unsigned char *val)
 static void ft5x0x_ts_report(struct ft5x0x_ts_data *ts) {
 	struct ft5x0x_event *event = &ts->event;
 	int x, y;
-	int i = 0;
+	int i;
 
 #ifdef CONFIG_FT5X0X_MULTITOUCH
 	for (i = 0; i < event->touch_point; i++) {
 		if(touch_size != 1)
 			event->x[i] = ts->screen_max_x - event->x[i];
-		//event->y[i] = ts->screen_max_y - event->y[i];
+		event->y[i] = ts->screen_max_y - event->y[i];
 #ifdef CONFIG_PRODUCT_SHENDAO
 		event->y[i] = ts->screen_max_y - event->y[i];
 #endif
@@ -201,7 +201,7 @@ static void ft5x0x_ts_report(struct ft5x0x_ts_data *ts) {
 			y = (y * ts->screen_max_y) / TOUCH_MAX_Y;
 		}
 	
-		if(0 == touch_size)
+		if(1 == touch_size)
 		{
 			x = ts->screen_max_x - x;
 		}	
@@ -375,13 +375,12 @@ static void ft5x0x_ts_suspend(struct early_suspend *handler)
 	ts = container_of(handler, struct ft5x0x_ts_data, early_suspend);
 
 	disable_irq(this_client->irq);
-	flush_workqueue(ts->queue);
 	cancel_work_sync(&ts->work);
-	//flush_workqueue(ts->queue);
+	flush_workqueue(ts->queue);
 
 	//ft5x0x_set_reg(FT5X0X_REG_PMODE, PMODE_HIBERNATE);
 #endif
-#if 0
+
 	if( IS_ERR_OR_NULL(dc33v_tp) )
 	{
 		printk( "error on dc33_tp regulator disable : tp_regulator is null\n");
@@ -391,13 +390,12 @@ static void ft5x0x_ts_suspend(struct early_suspend *handler)
 	{
 		regulator_force_disable(dc33v_tp);
 	}
-#endif
+
 	printk("ft5x0x_ts: suspended\n");
 }
 
 static void ft5x0x_ts_resume(struct early_suspend *handler)
 {
-#if 0
 	if( IS_ERR_OR_NULL(dc33v_tp) )
 	{
 		printk("error on dc33_tp regulator enable : tp_regulator is null\n");
@@ -408,7 +406,7 @@ static void ft5x0x_ts_resume(struct early_suspend *handler)
 		regulator_enable(dc33v_tp);
 		msleep(230);
 	}
-#endif	
+	
 #if 1
 	/* Wakeup: output_L --> 100ms --> output_H --> 100ms */
 	enable_irq(this_client->irq);
@@ -546,7 +544,7 @@ static int ft5x0x_ts_probe(struct i2c_client *client, const struct i2c_device_id
 	dev_info(&client->dev, "Firmware version 0x%02x\n", val);
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
-	ts->early_suspend.level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN;//EARLY_SUSPEND_LEVEL_DISABLE_FB + 1;
+	ts->early_suspend.level = EARLY_SUSPEND_LEVEL_DISABLE_FB + 1;
 	ts->early_suspend.suspend = ft5x0x_ts_suspend;
 	ts->early_suspend.resume = ft5x0x_ts_resume;
 	register_early_suspend(&ts->early_suspend);
@@ -644,7 +642,7 @@ static int __init ft5x0x_ts_init(void)
         gpio_free(EXYNOS4_GPX0(3));
         msleep(300);
 #endif
-#if 0
+
 	dc33v_tp = regulator_get(NULL, "dc33v_tp");  
 	if (IS_ERR(dc33v_tp)) {
 		printk("%s: failed to get %s\n", __func__, "dc33v_tp");
@@ -658,26 +656,6 @@ static int __init ft5x0x_ts_init(void)
 
 		msleep(30);
 	}
-#endif
-	type = get_lcd_type();
-
-#if 1
-        //TP1_EN
-	//printk("==%s: TP1_EN==\n", __FUNCTION__);
-        ret = gpio_request(EXYNOS4_GPL0(2), "TP1_EN");
-        if (ret) {
-                printk(KERN_ERR "failed to request TP1_EN for "
-                        "I2C control\n");
-                //return err;
-        }
-
-        gpio_direction_output(EXYNOS4_GPL0(2), 1);
-
-        s3c_gpio_cfgpin(EXYNOS4_GPL0(2), S3C_GPIO_OUTPUT);
-        gpio_free(EXYNOS4_GPL0(2));
-
-        mdelay(5);
-#endif
 
 #if 1
         printk("==%s: reset==\n", __FUNCTION__);
@@ -693,40 +671,23 @@ static int __init ft5x0x_ts_init(void)
         }
         gpio_direction_output(EXYNOS4_GPX0(3), 0);
         mdelay(200);
-	
         gpio_direction_output(EXYNOS4_GPX0(3), 1);
-	
 
         s3c_gpio_cfgpin(EXYNOS4_GPX0(3), S3C_GPIO_OUTPUT);
         gpio_free(EXYNOS4_GPX0(3));
         msleep(300);
 #endif
-	//type = get_lcd_type();
+	type = get_lcd_type();
 
 	if(0x00 == type)  //9.7
 	{
-		TOUCH_MAX_X = 1024;
-                TOUCH_MAX_Y = 768;
-
-#ifdef CONFIG_VT        //for Ubuntu
-                touch_size = 1;
-                scal_xy = 1;
-#else
-                touch_size = 1;//0;
 		scal_xy = 1;
-#endif
+
+		touch_size = 1;
 	}
 	else if(0x01 == type) //7.0
 	{
-#ifdef CONFIG_VT        //for Ubuntu
-                TOUCH_MAX_X = 800;//1280;
-                TOUCH_MAX_Y = 1280;//800;
-
-                scal_xy = 1;
-                touch_size = 0;
-#else
-                touch_size = 0;//1;
-#endif
+		touch_size = 1;
 	}
 	else if(0x02 == type)  //4.3
 	{
@@ -749,7 +710,7 @@ static void __exit ft5x0x_ts_exit(void)
 {
 	i2c_del_driver(&ft5x0x_ts_driver);
 
-	//regulator_put(dc33v_tp);
+	regulator_put(dc33v_tp);
 }
 
 //module_init(ft5x0x_ts_init);

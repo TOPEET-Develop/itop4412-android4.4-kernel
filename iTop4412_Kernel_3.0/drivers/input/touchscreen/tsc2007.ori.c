@@ -374,14 +374,12 @@ static void tsc2007_work(struct work_struct *work)
 			input_report_key(input, BTN_TOUCH, 1);
 			ts->pendown = true;
 		}
-#if 0
-		//x = SCREEN_MAX_X - tc.y;
-		//y = tc.x;
-		x = (tc.x*;
-		y = tc.y;
+#if 1
+		x = SCREEN_MAX_X - tc.y;
+		y = tc.x;
 #else
-		x = (tc.x * 48)/80;
-		y = (tc.y * 80)/48;
+		//x = (tc.x * 48)/80;
+		//y = (tc.y * 80)/48;
 #endif	
 		TSC2007_DEBUG("%s: x:%d, y:%d, pre:%d\n", __FUNCTION__, x, y, rt);
 		//printk("%s: x:%d, y:%d, pre:%d\n", __FUNCTION__, x, y, rt);;
