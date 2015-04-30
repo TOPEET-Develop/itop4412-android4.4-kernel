@@ -272,8 +272,8 @@ MODULE_DESCRIPTION("MediaTek MT6620 HIF SDIO Driver");
 
 MODULE_DEVICE_TABLE(sdio, mtk_sdio_id_tbl);
 
-//UINT32 gHifSdioDbgLvl = HIF_SDIO_LOG_INFO;//add by dg for debug
-UINT32  gHifSdioDbgLvl = HIF_SDIO_LOG_LOUD;
+UINT32 gHifSdioDbgLvl = HIF_SDIO_LOG_INFO;
+//UINT32  gHifSdioDbgLvl = HIF_SDIO_LOG_LOUD;//add by dg for debug
 
 /*******************************************************************************
 *                              F U N C T I O N S

@@ -164,9 +164,9 @@ static INT32 wmt_plat_dump_pin_conf (VOID);
 *                            P U B L I C   D A T A
 ********************************************************************************
 */
-//UINT32 gWmtDbgLvl = WMT_LOG_INFO; //dg change for debug
+UINT32 gWmtDbgLvl = WMT_LOG_INFO;
 
-UINT32 gWmtDbgLvl = WMT_LOG_LOUD;
+//UINT32 gWmtDbgLvl = WMT_LOG_LOUD;//dg change for debug
 
 unsigned int g_bgf_irq = -1;//bgf eint number
 unsigned int g_sdio_irq = -1;//bgf eint number
