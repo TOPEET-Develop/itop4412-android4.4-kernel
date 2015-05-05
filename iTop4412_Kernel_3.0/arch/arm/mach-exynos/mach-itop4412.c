@@ -1006,27 +1006,7 @@ void setup_mt6620_wlan_power_for_onoff(int on)
     int outValue;
 
     printk("[mt6620] +++ %s : wlan power %s\n",__func__, on?"on":"off");
-#if 0
-    if (on) {
-        chip_pwd_low_val = 1;
-    } else {
-        chip_pwd_low_val = 0;
-    }
 
-    if (gpio_request(EXYNOS4_GPC1(0),  "wlan_chip_pwd_l")!=0) {
-        printk("[mt6620] ERROR:Cannot request CHIP_PWD GPIO\n");
-    } else {
-        gpio_direction_output(EXYNOS4_GPC1(0), 1);/* WLAN_CHIP_PWD */
-        gpio_set_value(EXYNOS4_GPC1(0), chip_pwd_low_val);
-        mdelay(100);
-        gpio_free(EXYNOS4_GPZ(5));
-   }
-
-    if(on)
-    {
-     //need reset on mt6620 ? need test......
-    }
-#endif
 
 #if 1
     if (on) {
@@ -1093,23 +1073,6 @@ EXPORT_SYMBOL(setup_mt6620_wlan_power_for_onoff);
     };
     static void __init mtk_combo_init(void)
     {
-
-       /*
-        gpio_request(mtk_wmt_pdata.pmu, "MT66XX PMUEN");
-        gpio_request(mtk_wmt_pdata.rst, "MT66XX SYSRST");
-        gpio_direction_output(mtk_wmt_pdata.pmu, 0);
-        gpio_direction_output(mtk_wmt_pdata.rst, 0);
-        gpio_free(mtk_wmt_pdata.pmu);
-        gpio_free(mtk_wmt_pdata.rst);
-
-        /* step3. if use UART interface, config UART_CTS(host end) to UART_CTS mode;
-        if use common SDIO interface, config UART_CTS(host_end) to GPIO mode. */
-       // if (mtk_wmt_pdata.urt_cts == -EINVAL) {
-            //UART interface,config to UART CTS mode
-        //} else {
-            //SDIO interface,config to GPIO mode.
-            //omap_mux_set_gpio(3,mtk_wmt_pdata.urt_cts);
-        //}
 
         //MT66XX PMUEN
         if(gpio_request(EXYNOS4_GPC1(0), "GPC1_0"))
