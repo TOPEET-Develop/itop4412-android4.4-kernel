@@ -48,7 +48,11 @@
 #define PSM_HANDLING 127
 
 #define STP_PSM_WMT_PS_TASK_HANDLING_TIME  30   //20 milli-seconds
-#define STP_PSM_IDLE_TIME_SLEEP           5000   //temporary for stress testing
+//#define STP_PSM_IDLE_TIME_SLEEP           5000   //temporary for stress testing
+
+// idel to sleep , change 5`s to 60 `s  times  by dg ,or receive files later on UI that  cause mt6620 chip reset on androd4.4 .
+#define STP_PSM_IDLE_TIME_SLEEP             60000
+
 #define STP_PSM_SDIO_IDLE_TIME_SLEEP           100   //temporary for SDIO stress testing
 #define STP_PSM_WAIT_EVENT_TIMEOUT        6000
 
