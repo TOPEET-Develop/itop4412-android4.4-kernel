@@ -1036,7 +1036,7 @@ void setup_mt6620_wlan_power_for_onoff(int on)
     // mdelay(200);
 
     //need sdhc controler check wifi catd states......
-    sdhci_s3c_sdio_card_detect(&s3c_device_hsmmc3);
+  //  sdhci_s3c_sdio_card_detect(&s3c_device_hsmmc3);
 
     printk("[mt6620] --- %s\n",__func__);
 
@@ -1228,12 +1228,19 @@ void usb_hub_gpio_init(/*add by cym 20130426 */ void /* end add */)
         s3c_gpio_setpull(GPIO_HUB_RESET, S3C_GPIO_PULL_NONE);
         gpio_free(GPIO_HUB_RESET);
 
-        // HUB_CONNECT
+/*****************************************************************************************************************/
+//dg add  macro '#ifdef CONFIG_CPU_TYPE_SCP' on 2015-05-20
+//pop coreboard on wifi mt6620 chip need that ,pop wifi/bluetooth use EXYNOS4_GPK3(2)  pin, it is more important.
+//on pop core board  EXYNOS4_GPK3(2) is used for mt6620 wifi chip and usb3503A usb hub too.  SCP  is not that.
+//on pop usb3503A is not needed must.
+/*****************************************************************************************************************/
+// HUB_CONNECT
+#ifdef CONFIG_CPU_TYPE_SCP
         gpio_request(GPIO_HUB_CONNECT, "GPIO_HUB_CONNECT");
         gpio_direction_output(GPIO_HUB_CONNECT, 1);
         s3c_gpio_setpull(GPIO_HUB_CONNECT, S3C_GPIO_PULL_NONE);
         gpio_free(GPIO_HUB_CONNECT);
-
+#endif
         flags = 1;
     }
 #ifndef CONFIG_TC4_DVT
