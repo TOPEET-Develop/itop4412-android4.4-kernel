@@ -47,7 +47,7 @@ int down_af_firmware_flag = 0;
 #define VT_PURPLE  VT("0;35")
 
 
-//#define OV5640_DBG
+#define OV5640_DBG
 
 #define xprintk(fmt, ...) \
     printk("%s()->%d " fmt, __func__, __LINE__, ## __VA_ARGS__)
