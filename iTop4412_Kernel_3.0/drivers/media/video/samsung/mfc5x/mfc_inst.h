@@ -151,7 +151,7 @@ struct mfc_inst_ctx {
 #ifdef SYSMMU_MFC_ON
 	unsigned long pgd;
 #endif
-#if defined(CONFIG_BUSFREQ) ||defined(CONFIG_BUSFREQ_OPP)
+#ifdef CONFIG_BUSFREQ
 	int busfreq_flag;		/* context bus frequency flag */
 #endif
 };

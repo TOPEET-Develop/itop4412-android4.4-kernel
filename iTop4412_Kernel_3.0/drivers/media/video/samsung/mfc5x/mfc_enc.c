@@ -20,7 +20,6 @@
 #include <mach/cpufreq.h>
 #endif
 #include <mach/regs-mfc.h>
-#include <mach/dev.h>
 
 #include "mfc_enc.h"
 #include "mfc_cmd.h"
@@ -76,6 +75,8 @@ int get_init_arg(struct mfc_inst_ctx *ctx, void *arg)
 	else
 		enc_ctx->framemap = 0;	/* Default is Linear mode */
 
+	enc_ctx->outputmode = init_arg->cmn.in_output_mode ? 1 : 0;
+
 	/* width */
 	write_reg(init_arg->cmn.in_width, MFC_ENC_HSIZE_PX);
 	/* height */
@@ -99,6 +100,9 @@ int get_init_arg(struct mfc_inst_ctx *ctx, void *arg)
 		write_reg(0, MFC_ENC_MSLICE_MB);
 		write_reg(0, MFC_ENC_MSLICE_BIT);
 	}
+
+	/* slice interface */
+	write_reg((enc_ctx->outputmode) << 31, MFC_ENC_SI_CH1_INPUT_FLUSH);
 
 	/* cyclic intra refresh */
 	write_reg(init_arg->cmn.in_mb_refresh & 0xFFFF, MFC_ENC_CIR_CTRL);
@@ -1234,7 +1238,7 @@ int set_strm_ref_buf(struct mfc_inst_ctx *ctx)
 
 	for (i = 0; i < 2; i++) {
 		/*
-		 * allocate y0, y1 ref buffer
+		 * allocate Y0, Y1 ref buffer
 		 */
 		alloc = _mfc_alloc_buf(ctx, enc_ctx->lumasize, ALIGN_2KB, MBT_DPB | PORT_A);
 		if (alloc == NULL) {
@@ -1489,19 +1493,6 @@ int mfc_init_encoding(struct mfc_inst_ctx *ctx, union mfc_args *args)
 	}
 #endif
 
-#ifdef CONFIG_BUSFREQ_OPP
-			/* Fix MFC & Bus Frequency for High resolution for better performance */
-	if (ctx->width >= 1920 || ctx->height >= 1080) {
-		if (atomic_read(&ctx->dev->busfreq_lock_cnt) == 0) {
-			/* For fixed MFC & Bus Freq to 200 & 400 MHz for 1080p Contents */
-			dev_lock(ctx->dev->bus_dev,ctx->dev->device,BUSFREQ_400MHZ);
-			mfc_dbg("[%s] Bus Freq Locked L0  \n",__func__);
-		}
-
-		atomic_inc(&ctx->dev->busfreq_lock_cnt);
-		ctx->busfreq_flag = true;
-	}
-#endif 
 	/*
 	 * allocate & set DPBs
 	 */
@@ -1563,14 +1554,17 @@ static int mfc_encoding_frame(struct mfc_inst_ctx *ctx, struct mfc_enc_exe_arg *
 #ifdef CONFIG_VIDEO_MFC_VCM_UMP
 	void *ump_handle;
 #endif
-
+	struct mfc_enc_ctx *enc_ctx = (struct mfc_enc_ctx *)ctx->c_priv;
 
 	/* Set Frame Tag */
 	write_shm(ctx, exe_arg->in_frametag, SET_FRAME_TAG);
 
 	/* Set stream buffer addr */
-	write_reg(exe_arg->in_strm_st >> 11, MFC_ENC_SI_CH1_SB_ADR);
-	write_reg((exe_arg->in_strm_end - exe_arg->in_strm_st), MFC_ENC_SI_CH1_SB_SIZE);
+	enc_ctx->streamaddr = exe_arg->in_strm_st;
+	enc_ctx->streamsize = exe_arg->in_strm_end - exe_arg->in_strm_st;
+
+	write_reg(enc_ctx->streamaddr >> 11, MFC_ENC_SI_CH1_SB_ADR);
+	write_reg(enc_ctx->streamsize, MFC_ENC_SI_CH1_SB_SIZE);
 
 	#if 0
 	/* force I frame or Not-coded frame */
@@ -1623,16 +1617,46 @@ static int mfc_encoding_frame(struct mfc_inst_ctx *ctx, struct mfc_enc_exe_arg *
 		outer_flush_all();
 	}
 
-	ret = mfc_cmd_frame_start(ctx);
-	if (ret < 0)
-		return ret;
 
-	exe_arg->out_frame_type = read_reg(MFC_ENC_SI_SLICE_TYPE);
-	exe_arg->out_encoded_size = read_reg(MFC_ENC_SI_STRM_SIZE);
+	if (enc_ctx->outputmode == 0) { /* frame */
+		ret = mfc_cmd_frame_start(ctx);
+		if (ret < 0)
+			return ret;
+
+		exe_arg->out_frame_type = read_reg(MFC_ENC_SI_SLICE_TYPE);
+		exe_arg->out_encoded_size = read_reg(MFC_ENC_SI_STRM_SIZE);
+
+		/* FIXME: port must be checked */
+		exe_arg->out_Y_addr = mfc_mem_addr_ofs(read_reg(MFC_ENCODED_Y_ADDR) << 11, 1);
+		exe_arg->out_CbCr_addr = mfc_mem_addr_ofs(read_reg(MFC_ENCODED_C_ADDR) << 11, 1);
+	} else {			/* slice */
+		ret = mfc_cmd_slice_start(ctx);
+		if (ret < 0)
+			return ret;
+
+		if (enc_ctx->slicecount) {
+			exe_arg->out_frame_type = -1;
+			exe_arg->out_encoded_size = enc_ctx->slicesize;
+
+			exe_arg->out_Y_addr = 0;
+			exe_arg->out_CbCr_addr = 0;
+		} else {
+			exe_arg->out_frame_type = read_reg(MFC_ENC_SI_SLICE_TYPE);
+			exe_arg->out_encoded_size = enc_ctx->slicesize;
+
+			/* FIXME: port must be checked */
+			exe_arg->out_Y_addr = mfc_mem_addr_ofs(read_reg(MFC_ENCODED_Y_ADDR) << 11, 1);
+			exe_arg->out_CbCr_addr = mfc_mem_addr_ofs(read_reg(MFC_ENCODED_C_ADDR) << 11, 1);
+		}
+	}
+
+	mfc_dbg("frame type: %d, encoded size: %d, slice size: %d, stream size: %d\n",
+		exe_arg->out_frame_type, exe_arg->out_encoded_size,
+		enc_ctx->slicesize, read_reg(MFC_ENC_SI_STRM_SIZE));
+
 	/* Get Frame Tag top and bottom */
 	exe_arg->out_frametag_top = read_shm(ctx, GET_FRAME_TAG_TOP);
 	exe_arg->out_frametag_bottom = read_shm(ctx, GET_FRAME_TAG_BOT);
-
 
 	/* MFC fw 9/30 */
 	/*
@@ -1641,10 +1665,6 @@ static int mfc_encoding_frame(struct mfc_inst_ctx *ctx, struct mfc_enc_exe_arg *
 	enc_arg->out_CbCr_addr =
 	    cur_frm_base + (read_reg(MFC_ENCODED_C_ADDR) << 11);
 	*/
-
-	/* FIXME: port must be checked */
-	exe_arg->out_Y_addr = mfc_mem_addr_ofs(read_reg(MFC_ENCODED_Y_ADDR) << 11, 1);
-	exe_arg->out_CbCr_addr = mfc_mem_addr_ofs(read_reg(MFC_ENCODED_C_ADDR) << 11, 1);
 
 	/* FIXME: cookie may be invalide */
 #if defined(CONFIG_VIDEO_MFC_VCM_UMP)

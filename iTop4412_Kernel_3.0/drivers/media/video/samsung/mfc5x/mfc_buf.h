@@ -172,7 +172,7 @@ void mfc_final_buf(void);
 void mfc_set_buf_alloc_scheme(enum MFC_BUF_ALLOC_SCHEME scheme);
 void mfc_merge_buf(void);
 struct mfc_alloc_buffer *_mfc_alloc_buf(
-	struct mfc_inst_ctx *ctx, int size, int align, int flag);
+	struct mfc_inst_ctx *ctx, unsigned int size, int align, int flag);
 int mfc_alloc_buf(
 	struct mfc_inst_ctx *ctx, struct mfc_buf_alloc_arg* args, int flag);
 int _mfc_free_buf(unsigned long real);

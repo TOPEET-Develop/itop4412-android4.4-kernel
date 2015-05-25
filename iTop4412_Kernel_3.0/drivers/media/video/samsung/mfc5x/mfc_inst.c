@@ -52,7 +52,7 @@ struct mfc_inst_ctx *mfc_create_inst(void)
 
 	ctx->codecid = -1;
 	ctx->resolution_status = RES_NO_CHANGE;
-#if defined(CONFIG_BUSFREQ) ||defined(CONFIG_BUSFREQ_OPP)
+#ifdef CONFIG_BUSFREQ
 	ctx->busfreq_flag = false;
 #endif
 
@@ -104,9 +104,9 @@ void mfc_destroy_inst(struct mfc_inst_ctx* ctx)
 		}
 
 		if (ctx->state >= INST_STATE_OPEN) {
-			mfc_clock_on();
+			mfc_clock_on(ctx->dev);
 			mfc_cmd_inst_close(ctx);
-			mfc_clock_off();
+			mfc_clock_off(ctx->dev);
 		}
 
 		mfc_free_buf_inst(ctx->id);

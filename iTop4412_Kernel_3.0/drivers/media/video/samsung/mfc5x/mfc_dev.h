@@ -103,17 +103,9 @@ struct mfc_dev {
 	struct s5p_vcm_mmu	*_vcm_mmu;
 
 	struct device		*device;
-#if defined(CONFIG_BUSFREQ) ||defined(CONFIG_BUSFREQ_OPP)
-
+#ifdef CONFIG_BUSFREQ
 	atomic_t		busfreq_lock_cnt; /* Bus frequency Lock count */
-#endif
-
-#ifdef CONFIG_BUSFREQ_OPP
-	struct device			*bus_dev;
 #endif
 };
 
-#if defined(CONFIG_BUSFREQ_OPP)
-#define BUSFREQ_400MHZ	400000
-#endif
 #endif /* __MFC_DEV_H */

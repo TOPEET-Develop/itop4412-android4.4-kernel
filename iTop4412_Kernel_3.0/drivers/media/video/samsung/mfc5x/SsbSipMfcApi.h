@@ -76,6 +76,11 @@ typedef enum {
 } SSBSIP_MFC_INSTRM_MODE_TYPE;
 
 typedef enum {
+    FRAME = 0,
+    SLICE = 1,
+} SSBSIP_MFC_OUTSTRM_MODE_TYPE;
+
+typedef enum {
 	NO_CACHE = 0,
 	CACHE = 1
 } SSBIP_MFC_BUFFER_TYPE;
@@ -240,6 +245,7 @@ typedef struct {
     int CbPadVal;                       /* [IN] CB pel value used to fill padding area */
     int CrPadVal;                       /* [IN] CR pel value used to fill padding area */
     int FrameMap;                       /* [IN] Encoding input mode(tile mode or linear mode) */
+    int OutputMode;                     /* [IN] Output mode: Frame/Slice */
 
     /* H.264 specific parameters */
     int ProfileIDC;                     /* [IN] profile */
@@ -283,6 +289,7 @@ typedef struct {
     int CbPadVal;                       /* [IN] CB pel value used to fill padding area */
     int CrPadVal;                       /* [IN] CR pel value used to fill padding area */
     int FrameMap;                       /* [IN] Encoding input mode(tile mode or linear mode) */
+    int OutputMode;                     /* [IN] Output mode: Frame/Slice */
 
     /* MPEG4 specific parameters */
     int ProfileIDC;                     /* [IN] profile */
@@ -315,6 +322,7 @@ typedef struct {
     int CbPadVal;                       /* [IN] CB pel value used to fill padding area */
     int CrPadVal;                       /* [IN] CR pel value used to fill padding area */
     int FrameMap;                       /* [IN] Encoding input mode(tile mode or linear mode) */
+    int OutputMode;                     /* [IN] Output mode: Frame/Slice */
 
     /* H.263 specific parameters */
     int FrameRate;                      /* [IN] rate control parameter(frame rate) */

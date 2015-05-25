@@ -57,7 +57,7 @@ static struct mfc_vcm vcm_info;
 #endif
 
 #ifndef CONFIG_EXYNOS4_CONTENT_PATH_PROTECTION
-static int mfc_mem_addr_port(unsigned int addr)
+static int mfc_mem_addr_port(unsigned long addr)
 {
 	int i;
 	int port = -1;
@@ -79,7 +79,7 @@ int mfc_mem_count(void)
 	return mem_ports;
 }
 
-unsigned int mfc_mem_base(int port)
+unsigned long mfc_mem_base(int port)
 {
 	if ((port < 0) || (port >= mem_ports))
 		return 0;
@@ -95,9 +95,9 @@ unsigned char *mfc_mem_addr(int port)
 	return mem_infos[port].addr;
 }
 
-unsigned int mfc_mem_data_base(int port)
+unsigned long mfc_mem_data_base(int port)
 {
-	unsigned int addr;
+	unsigned long addr;
 
 #ifndef CONFIG_EXYNOS4_CONTENT_PATH_PROTECTION
 	if ((port < 0) || (port >= mem_ports))
@@ -130,12 +130,15 @@ unsigned int mfc_mem_data_size(int port)
 #ifdef CONFIG_EXYNOS4_CONTENT_PATH_PROTECTION
 unsigned int mfc_mem_hole_size(void)
 {
-	return mfc_mem_data_base(1) -
-		(mfc_mem_data_base(0) + mfc_mem_data_size(0));
+	if (mfc_mem_data_size(1))
+		return mfc_mem_data_base(1) -
+			(mfc_mem_data_base(0) + mfc_mem_data_size(0));
+	else
+		return 0;
 }
 #endif
 
-unsigned int mfc_mem_data_ofs(unsigned int addr, int contig)
+unsigned long mfc_mem_data_ofs(unsigned long addr, int contig)
 {
 	unsigned int offset;
 	int i;
@@ -159,7 +162,7 @@ unsigned int mfc_mem_data_ofs(unsigned int addr, int contig)
 	return offset;
 }
 
-unsigned int mfc_mem_base_ofs(unsigned int addr)
+unsigned long mfc_mem_base_ofs(unsigned long addr)
 {
 	int port;
 
@@ -174,7 +177,7 @@ unsigned int mfc_mem_base_ofs(unsigned int addr)
 	return addr - mem_infos[port].base;
 }
 
-unsigned int mfc_mem_addr_ofs(unsigned int ofs, int port)
+unsigned long mfc_mem_addr_ofs(unsigned long ofs, int port)
 {
 	/* FIXME: right position? */
 	if (port > (mfc_mem_count() - 1))
@@ -581,8 +584,7 @@ int mfc_init_mem_mgr(struct mfc_dev *dev)
 	size = MFC_MEMSIZE_DRM;
 	if (size > available_size) {
 		mfc_info("failed to allocate DRM shared area (%d:%d)\n",
-			(cma_infos[0].free_size + hole_size + MFC_MEMSIZE_DRM) >> 10,
-			MAX_MEM_OFFSET >> 10);
+			size >> 10, available_size >> 10);
 		return -ENOMEM;
 	}
 
@@ -600,26 +602,28 @@ int mfc_init_mem_mgr(struct mfc_dev *dev)
 	available_size -= dev->drm_info.size;
 	mfc_dbg("avail: 0x%08x\n", available_size);
 
-	size = cma_infos[1].free_size - MFC_MEMSIZE_DRM;
-	if (size > available_size) {
-		mfc_warn("<Warning> large hole between reserved memory, "
-			"'mfc-normal' size will be shrink (%d:%d)\n",
-			size >> 10,
-			available_size >> 10);
-		size = available_size;
-	}
+	if (available_size > 0) {
+		size = cma_infos[1].free_size - MFC_MEMSIZE_DRM;
+		if (size > available_size) {
+			mfc_warn("<Warning> large hole between reserved memory, "
+				"'mfc-normal' size will be shrink (%d:%d)\n",
+					size >> 10,
+					available_size >> 10);
+			size = available_size;
+		}
 
-	base[2] = cma_alloc(dev->device, "B", size, ALIGN_128KB);
-	if (IS_ERR_VALUE(base[2])) {
-		mfc_err("failed to get rsv. memory from CMA on mfc-normal");
-		cma_free(base[1]);
-		cma_free(base[0]);
-		return -ENOMEM;
-	}
+		base[2] = cma_alloc(dev->device, "B", size, ALIGN_128KB);
+		if (IS_ERR_VALUE(base[2])) {
+			mfc_err("failed to get rsv. memory from CMA on mfc-normal");
+			cma_free(base[1]);
+			cma_free(base[0]);
+			return -ENOMEM;
+		}
 
-	dev->mem_infos[1].base = base[2];
-	dev->mem_infos[1].size = size;
-	dev->mem_infos[1].addr = cma_get_virt(base[2], size, 0);
+		dev->mem_infos[1].base = base[2];
+		dev->mem_infos[1].size = size;
+		dev->mem_infos[1].addr = cma_get_virt(base[2], size, 0);
+	}
 #else
 	if (dev->mem_ports == 1) {
 		if (cma_info(&cma_infos[0], dev->device, "AB")) {
@@ -685,8 +689,8 @@ int mfc_init_mem_mgr(struct mfc_dev *dev)
 		if (size > MAX_MEM_OFFSET) {
 			mfc_warn("<Warning> too large 'mfc%d' reserved memory, "
 				"size will be shrink (%d:%d)\n",
-				cma_index, size >> 10,
-				MAX_MEM_OFFSET >> 10);
+					cma_index, size >> 10,
+					MAX_MEM_OFFSET >> 10);
 			size = MAX_MEM_OFFSET;
 		}
 
@@ -779,7 +783,7 @@ void mfc_vcm_dump_res(struct vcm_res *res)
 	mfc_dbg("\tphys : 0x%08x, bound_size: 0x%08x\n", (unsigned int)res->phys, (unsigned int)res->bound_size);
 }
 
-struct vcm_mmu_res *mfc_vcm_bind(unsigned int addr, unsigned int size)
+struct vcm_mmu_res *mfc_vcm_bind(unsigned long addr, unsigned int size)
 {
 	struct vcm_mmu_res *s_res;
 	struct vcm_phys *phys;

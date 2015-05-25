@@ -70,10 +70,6 @@ irqreturn_t mfc_irq(int irq, void *dev_id)
 	}
 #endif
 
-	/* FIXME: codec wait_queue processing */
-	dev->irq_sys = 1;
-	wake_up(&dev->wait_sys);
-
 	/*
 	 * FIXME: check is codec command return or error
 	 * move to mfc_wait_codec() ?
@@ -82,6 +78,10 @@ irqreturn_t mfc_irq(int irq, void *dev_id)
 
 	write_reg(0, MFC_RISC2HOST_CMD);
 	write_reg(0, MFC_RISC_HOST_INT);
+
+	/* FIXME: codec wait_queue processing */
+	dev->irq_sys = 1;
+	wake_up(&dev->wait_sys);
 
 	return IRQ_HANDLED;
 }
@@ -135,6 +135,14 @@ mfc_wait_sys(struct mfc_dev *dev, enum mfc_r2h_ret ret, long timeout)
 	}
 
 	if (r2h_cmd != ret) {
+		/* exceptional case: FRAME_START -> EDFU_INIT_RET */
+		if ((ret == FRAME_DONE_RET) && (r2h_cmd == EDFU_INIT_RET))
+			return true;
+
+		/* exceptional case: CLOSE_CH_RET -> ABORT_RET */
+		if ((ret == CLOSE_CH_RET) && (r2h_cmd == ABORT_RET))
+			return true;
+
 		mfc_err("F/W return (%d) waiting for (%d)\n",
 			r2h_cmd, ret);
 
@@ -320,6 +328,18 @@ int mfc_cmd_inst_close(struct mfc_inst_ctx *ctx)
 		return MFC_CLOSE_FAIL;
 	}
 
+	/* retry instance close */
+	if (r2h_cmd == ABORT_RET) {
+		if (write_h2r_cmd(CLOSE_CH, &h2r_args) == false)
+			return MFC_CMD_FAIL;
+
+		if (mfc_wait_sys(ctx->dev, CLOSE_CH_RET,
+			msecs_to_jiffies(H2R_INT_TIMEOUT)) == false) {
+			mfc_err("failed to close instance\n");
+			return MFC_CLOSE_FAIL;
+		}
+	}
+
 	return MFC_OK;
 }
 
@@ -411,6 +431,47 @@ int mfc_cmd_frame_start(struct mfc_inst_ctx *ctx)
 		mfc_err("failed to frame start\n");
 		return MFC_DEC_EXE_TIME_OUT;
 	}
+
+	return MFC_OK;
+}
+
+int mfc_cmd_slice_start(struct mfc_inst_ctx *ctx)
+{
+	struct mfc_enc_ctx *enc_ctx = (struct mfc_enc_ctx *)ctx->c_priv;
+	struct mfc_cmd_args h2r_args;
+
+	/* all codec command pass the shared mem addrees */
+	write_reg(ctx->shmofs, MFC_SI_CH1_HOST_WR_ADR);
+
+	if (enc_ctx->slicecount == 0) {
+		write_reg((FRAME_START << 16 & 0x70000) | ctx->cmd_id,
+			MFC_SI_CH1_INST_ID);
+
+		enc_ctx->slicecount = 1;
+	} else {
+		memset(&h2r_args, 0, sizeof(struct mfc_cmd_args));
+		h2r_args.arg[0] = enc_ctx->streamaddr >> 11;
+
+		if (write_h2r_cmd(CONTINUE_ENC, &h2r_args) == false)
+			return MFC_CMD_FAIL;
+	}
+
+#ifdef MFC_PERF
+	do_gettimeofday(&tv1);
+#endif
+
+	if (mfc_wait_sys(ctx->dev, FRAME_DONE_RET,
+		msecs_to_jiffies(CODEC_INT_TIMEOUT)) == false) {
+		mfc_err("failed to slice start\n");
+		return MFC_DEC_EXE_TIME_OUT;
+	}
+
+	if (r2h_cmd == EDFU_INIT_RET)
+		enc_ctx->slicecount++;
+	else /* FRAME_DONE_RET */
+		enc_ctx->slicecount = 0;
+
+	enc_ctx->slicesize = r2h_args.arg[2];
 
 	return MFC_OK;
 }

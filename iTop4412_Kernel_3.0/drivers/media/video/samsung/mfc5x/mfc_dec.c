@@ -21,7 +21,6 @@
 #include <mach/cpufreq.h>
 #endif
 #include <mach/regs-mfc.h>
-#include <mach/dev.h>
 
 #include "mfc_dec.h"
 #include "mfc_cmd.h"
@@ -1860,25 +1859,6 @@ int mfc_init_decoding(struct mfc_inst_ctx *ctx, union mfc_args *args)
 	}
 #endif
 
-#ifdef CONFIG_BUSFREQ_OPP
-
-		/* Lock MFC & Bus FREQ for high resolution */
-	if (ctx->width >= 1920 || ctx->height >= 1080) {
-		if (atomic_read(&ctx->dev->busfreq_lock_cnt) == 0) {
-			if (ctx->codecid == H264_DEC) {
-				dev_lock(ctx->dev->bus_dev,ctx->dev->device,BUSFREQ_400MHZ);
-				mfc_dbg("Bus FREQ locked to L0\n");
-			} else {
-				dev_lock(ctx->dev->bus_dev,ctx->dev->device,BUSFREQ_400MHZ);
-				mfc_dbg("Bus FREQ locked to L1\n");
-			}
-		}
-
-		atomic_inc(&ctx->dev->busfreq_lock_cnt);
-		ctx->busfreq_flag = true;
-	}
-	
-#endif 
 	/*
 	 * allocate & set codec buffers
 	 */
@@ -1940,19 +1920,6 @@ err_codec_bufs:
 		}
 	}
 #endif
-#ifdef CONFIG_BUSFREQ_OPP
-		/* Release MFC & Bus Frequency lock for High resolution */
-	if (ctx->busfreq_flag == true) {
-		atomic_dec(&ctx->dev->busfreq_lock_cnt);
-		ctx->busfreq_flag = false;
-
-		if (atomic_read(&ctx->dev->busfreq_lock_cnt) == 0) {
-			dev_unlock(ctx->dev->bus_dev,ctx->dev->device);
-			mfc_dbg("Bus FREQ released\n");
-		}
-	}
-	
-#endif 
 
 err_set_arg:
 err_chk_res:
@@ -2011,7 +1978,7 @@ int mfc_change_resolution(struct mfc_inst_ctx *ctx, struct mfc_dec_exe_arg *exe_
 	if (ctx->c_ops->post_seq_start) {
 		if (ctx->c_ops->post_seq_start(ctx) < 0)
 			return MFC_DEC_INIT_FAIL;
-		}
+	}
 
 	if (ctx->height > MAX_VER_SIZE) {
 		if (ctx->height > MAX_HOR_SIZE) {
@@ -2079,9 +2046,7 @@ static int mfc_decoding_frame(struct mfc_inst_ctx *ctx, struct mfc_dec_exe_arg *
 	int display_frame_tag;
 	unsigned char *stream_vir;
 	int ret;
-
 	struct mfc_dec_ctx *dec_ctx = (struct mfc_dec_ctx *)ctx->c_priv;
-
 #ifdef CONFIG_VIDEO_MFC_VCM_UMP
 	void *ump_handle;
 #endif

@@ -33,8 +33,8 @@
 
 #define MFC_MAX_MEM_PORT_NUM	(1)
 
-#define MFC_MEMSIZE_PORT_A	(CONFIG_VIDEO_SAMSUNG_MEMSIZE_MFC0 << 10)
-#define MFC_MEMSIZE_PORT_B	(CONFIG_VIDEO_SAMSUNG_MEMSIZE_MFC1 << 10)
+#define MFC_MEMSIZE_PORT_A	(CONFIG_VIDEO_SAMSUNG_MEMSIZE_MFC0 << 10)//lt,don't modified,because it shoude be same with mach-smdk4412.c
+#define MFC_MEMSIZE_PORT_B	(CONFIG_VIDEO_SAMSUNG_MEMSIZE_MFC1 << 10)//lt,don't modified,because it shoude be same with mach-smdk4412.c
 
 #define MFC_MEMSIZE_DRM		0x20000
 #define MFC_SHM_OFS_DRM		0x400

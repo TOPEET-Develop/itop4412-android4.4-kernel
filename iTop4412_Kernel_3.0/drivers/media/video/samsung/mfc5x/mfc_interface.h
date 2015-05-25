@@ -132,6 +132,8 @@ struct mfc_enc_init_common_arg {
 
 	unsigned int in_pixelcache;
 
+	unsigned int in_output_mode;
+
 	unsigned int in_mapped_addr;
 	struct mfc_strm_ref_buf_arg out_u_addr;
 	struct mfc_strm_ref_buf_arg out_p_addr;

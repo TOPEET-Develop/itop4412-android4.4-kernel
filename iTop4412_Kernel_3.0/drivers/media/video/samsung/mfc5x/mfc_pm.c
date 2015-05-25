@@ -17,6 +17,7 @@
 #ifdef CONFIG_PM_RUNTIME
 #include <linux/pm_runtime.h>
 #endif
+#include <linux/interrupt.h>
 
 #include <plat/clock.h>
 #include <plat/s5p-mfc.h>
@@ -114,23 +115,26 @@ void mfc_final_pm(struct mfc_dev *mfcdev)
 #endif
 }
 
-int mfc_clock_on(void)
+int mfc_clock_on(struct mfc_dev *mfcdev)
 {
+	int ret;
 #ifdef CLK_DEBUG
 	atomic_inc(&clk_ref);
 	mfc_dbg("+ %d", atomic_read(&clk_ref));
 #endif
 
-	return clk_enable(pm->clock);
+	ret = clk_enable(pm->clock);
+	enable_irq(mfcdev->irq);
+	return  ret;
 }
 
-void mfc_clock_off(void)
+void mfc_clock_off(struct mfc_dev *mfcdev)
 {
 #ifdef CLK_DEBUG
 	atomic_dec(&clk_ref);
 	mfc_dbg("- %d", atomic_read(&clk_ref));
 #endif
-
+	disable_irq(mfcdev->irq);
 	clk_disable(pm->clock);
 }
 

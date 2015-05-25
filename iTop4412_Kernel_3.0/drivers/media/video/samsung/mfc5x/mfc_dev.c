@@ -58,7 +58,6 @@
 #include <plat/sysmmu.h>
 #endif
 
-#include <mach/dev.h>
 #define MFC_MINOR	252
 #define MFC_FW_NAME	"mfc_fw.bin"
 
@@ -199,7 +198,7 @@ static int mfc_open(struct inode *inode, struct file *file)
 
 #ifndef CONFIG_PM_RUNTIME
 #ifdef SYSMMU_MFC_ON
-		mfc_clock_on();
+		mfc_clock_on(mfcdev);
 
 		s5p_sysmmu_enable(mfcdev->device);
 
@@ -215,7 +214,7 @@ static int mfc_open(struct inode *inode, struct file *file)
 		 */
 		s5p_sysmmu_tlb_invalidate(mfcdev->device, SYSMMU_MFC_R);
 #endif
-		mfc_clock_off();
+		mfc_clock_off(mfcdev);
 #endif
 #endif
 		/* MFC hardware initialization */
@@ -339,20 +338,6 @@ static int mfc_release(struct inode *inode, struct file *file)
 	}
 #endif
 
-#ifdef CONFIG_BUSFREQ_OPP
-	/* Release MFC & Bus Frequency lock for High resolution */
-	if (mfc_ctx->busfreq_flag == true) {
-		atomic_dec(&dev->busfreq_lock_cnt);
-		mfc_ctx->busfreq_flag = false;
-		if (atomic_read(&dev->busfreq_lock_cnt) == 0) {
-			/* Unlock bus frequency */
-			dev_unlock(dev->bus_dev, dev->device);
-			mfc_dbg("[%s] Bus Freq lock Released Normal!\n", __func__);
-		}
-	}
-
-#endif
-
 #ifdef CONFIG_EXYNOS4_CONTENT_PATH_PROTECTION
 	mfcdev->drm_playback = 0;
 
@@ -376,11 +361,11 @@ static int mfc_release(struct inode *inode, struct file *file)
 		}
 	} else {
 #if defined(SYSMMU_MFC_ON) && !defined(CONFIG_VIDEO_MFC_VCM_UMP)
-	mfc_clock_on();
+	mfc_clock_on(mfcdev);
 
 	s5p_sysmmu_tlb_invalidate(dev->device);
 
-	mfc_clock_off();
+	mfc_clock_off(mfcdev);
 #endif
 	}
 
@@ -444,10 +429,10 @@ static long mfc_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 			break;
 		}
 
-		mfc_clock_on();
+		mfc_clock_on(mfcdev);
 		in_param.ret_code = mfc_init_decoding(mfc_ctx, &(in_param.args));
 		ret = in_param.ret_code;
-		mfc_clock_off();
+		mfc_clock_off(mfcdev);
 
 		mutex_unlock(&dev->lock);
 		break;
@@ -465,10 +450,10 @@ static long mfc_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 			break;
 		}
 
-		mfc_clock_on();
+		mfc_clock_on(mfcdev);
 		in_param.ret_code = mfc_init_encoding(mfc_ctx, &(in_param.args));
 		ret = in_param.ret_code;
-		mfc_clock_off();
+		mfc_clock_off(mfcdev);
 
 		mutex_unlock(&dev->lock);
 		break;
@@ -486,10 +471,10 @@ static long mfc_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 			break;
 		}
 
-		mfc_clock_on();
+		mfc_clock_on(mfcdev);
 		in_param.ret_code = mfc_exec_decoding(mfc_ctx, &(in_param.args));
 		ret = in_param.ret_code;
-		mfc_clock_off();
+		mfc_clock_off(mfcdev);
 
 		mutex_unlock(&dev->lock);
 		break;
@@ -507,10 +492,10 @@ static long mfc_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 			break;
 		}
 
-		mfc_clock_on();
+		mfc_clock_on(mfcdev);
 		in_param.ret_code = mfc_exec_encoding(mfc_ctx, &(in_param.args));
 		ret = in_param.ret_code;
-		mfc_clock_off();
+		mfc_clock_off(mfcdev);
 
 		mutex_unlock(&dev->lock);
 		break;
@@ -923,34 +908,28 @@ static int mfc_mmap(struct file *file, struct vm_area_struct *vma)
 	remap_size = min((unsigned long)mfc_mem_data_size(1),
 			user_size - remap_offset);
 	/*
-	 * Chunk 1 mapping
+	 * Chunk 1 mapping if it's available
 	 */
-	if (remap_size <= 0) {
-		mfc_err("invalid remap size of chunk 1\n");
-		return -EINVAL;
-	}
+	if (remap_size > 0) {
+		pfn = __phys_to_pfn(mfc_mem_data_base(1));
+		if (remap_pfn_range(vma, vma->vm_start + remap_offset, pfn,
+					remap_size, vma->vm_page_prot)) {
 
-	pfn = __phys_to_pfn(mfc_mem_data_base(1));
-	if (remap_pfn_range(vma, vma->vm_start + remap_offset, pfn,
-				remap_size, vma->vm_page_prot)) {
-
-		mfc_err("failed to remap chunk 1\n");
-		return -EINVAL;
+			mfc_err("failed to remap chunk 1\n");
+			return -EINVAL;
+		}
 	}
 #else
+	vma->vm_flags |= VM_RESERVED | VM_IO;
+	if (mfc_ctx->buf_cache_type == NO_CACHE)
+		vma->vm_page_prot = pgprot_writecombine(vma->vm_page_prot);
+
+	mfc_info("MFC buffers are %scacheable\n",
+			mfc_ctx->buf_cache_type ? "" : "non-");
+
 	if (dev->mem_ports == 1) {
 		remap_offset = 0;
-		remap_size = user_size;
-
-		vma->vm_flags |= VM_RESERVED | VM_IO;
-
-		if(mfc_ctx->buf_cache_type == NO_CACHE){
-			vma->vm_page_prot = pgprot_writecombine(vma->vm_page_prot);
-			mfc_info("CONFIG_VIDEO_MFC_CACHE is not enabled\n");
-		}else
-			mfc_info("CONFIG_VIDEO_MFC_CACHE is enabled\n");
-
-
+		remap_size = min((unsigned long)mfc_mem_data_size(0), user_size);
 		/*
 		 * Port 0 mapping for stream buf & frame buf (chroma + MV + luma)
 		 */
@@ -964,17 +943,6 @@ static int mfc_mmap(struct file *file, struct vm_area_struct *vma)
 	} else {
 		remap_offset = 0;
 		remap_size = min((unsigned long)mfc_mem_data_size(0), user_size);
-
-		vma->vm_flags |= VM_RESERVED | VM_IO;
-
-		if(mfc_ctx->buf_cache_type == NO_CACHE){
-			vma->vm_page_prot = pgprot_writecombine(vma->vm_page_prot);
-			mfc_info("CONFIG_VIDEO_MFC_CACHE is not enabled\n");
-		}else
-			mfc_info("CONFIG_VIDEO_MFC_CACHE is enabled\n");
-
-
-
 		/*
 		 * Port 0 mapping for stream buf & frame buf (chroma + MV)
 		 */
@@ -989,13 +957,6 @@ static int mfc_mmap(struct file *file, struct vm_area_struct *vma)
 		remap_offset = remap_size;
 		remap_size = min((unsigned long)mfc_mem_data_size(1),
 			user_size - remap_offset);
-
-		vma->vm_flags |= VM_RESERVED | VM_IO;
-
-		if(mfc_ctx->buf_cache_type == NO_CACHE)
-			vma->vm_page_prot = pgprot_writecombine(vma->vm_page_prot);
-
-
 		/*
 		 * Port 1 mapping for frame buf (luma)
 		 */
@@ -1008,7 +969,6 @@ static int mfc_mmap(struct file *file, struct vm_area_struct *vma)
 		}
 	}
 #endif
-
 	mfc_ctx->userbase = vma->vm_start;
 
 	mfc_dbg("user request mem = %ld, available data mem = %ld\n",
@@ -1107,12 +1067,6 @@ static int __devinit mfc_probe(struct platform_device *pdev)
 #endif
 	mfcdev->device = &pdev->dev;
 
-#ifdef CONFIG_BUSFREQ_OPP
-		atomic_set(&mfcdev->busfreq_lock_cnt, 0);
-
-		/* To lock bus frequency in OPP mode */
-	mfcdev->bus_dev = dev_get("exynos-busfreq");
-#endif
 	platform_set_drvdata(pdev, mfcdev);
 
 	/* get the memory region */
@@ -1206,14 +1160,17 @@ static int __devinit mfc_probe(struct platform_device *pdev)
 	/*
 	 * initialize buffer manager
 	 */
-	mfc_init_buf();
+	ret = mfc_init_buf();
+	if (ret < 0) {
+		printk(KERN_ERR "failed to init. MFC buffer manager\n");
+		goto err_buf_mgr;
+	}
 
 	/* FIXME: final dec & enc */
 	mfc_init_decoders();
 	mfc_init_encoders();
 
 	ret = misc_register(&mfc_miscdev);
-
 	if (ret) {
 		mfc_err("MFC can't misc register on minor=%d\n", MFC_MINOR);
 		goto err_misc_reg;
@@ -1223,6 +1180,8 @@ static int __devinit mfc_probe(struct platform_device *pdev)
 		(soc_is_exynos4412() && (samsung_rev() < EXYNOS4412_REV_1_1)))
 		mfc_pd_enable();
 
+	disable_irq(mfcdev->irq);
+
 	mfc_info("MFC(Multi Function Codec - FIMV v5.x) registered successfully\n");
 
 	return 0;
@@ -1230,32 +1189,33 @@ static int __devinit mfc_probe(struct platform_device *pdev)
 err_misc_reg:
 	mfc_final_buf();
 
+err_buf_mgr:
 #ifdef SYSMMU_MFC_ON
 #ifdef CONFIG_VIDEO_MFC_VCM_UMP
-	mfc_clock_on();
+	mfc_clock_on(mfcdev);
 
 	vcm_deactivate(mfcdev->vcm_info.sysmmu_vcm);
 
-	mfc_clock_off();
+	mfc_clock_off(mfcdev);
 
 err_act_vcm:
 #endif
-	mfc_clock_on();
+	mfc_clock_on(mfcdev);
 
 	s5p_sysmmu_disable(mfcdev->device);
 
-	mfc_clock_off();
+	mfc_clock_off(mfcdev);
 #endif
 	if (mfcdev->fw.info)
 		release_firmware(mfcdev->fw.info);
 
 err_fw_req:
 	/* FIXME: make kenel dump when probe fail */
-	mfc_clock_on();
+	mfc_clock_on(mfcdev);
 
 	mfc_final_mem_mgr(mfcdev);
 
-	mfc_clock_off();
+	mfc_clock_off(mfcdev);
 
 err_mem_mgr:
 	mfc_final_pm(mfcdev);
@@ -1293,7 +1253,7 @@ static int __devexit mfc_remove(struct platform_device *pdev)
 
 	mfc_final_buf();
 #ifdef SYSMMU_MFC_ON
-	mfc_clock_on();
+	mfc_clock_on(mfcdev);
 
 #ifdef CONFIG_VIDEO_MFC_VCM_UMP
 	vcm_deactivate(mfcdev->vcm_info.sysmmu_vcm);
@@ -1301,7 +1261,7 @@ static int __devexit mfc_remove(struct platform_device *pdev)
 
 	s5p_sysmmu_disable(mfcdev->device);
 
-	mfc_clock_off();
+	mfc_clock_off(mfcdev);
 #endif
 	if (dev->fw.info)
 		release_firmware(dev->fw.info);
@@ -1349,7 +1309,7 @@ static int mfc_resume(struct device *dev)
 		return 0;
 
 #ifdef SYSMMU_MFC_ON
-	mfc_clock_on();
+	mfc_clock_on(dev);
 
 	s5p_sysmmu_enable(dev);
 
@@ -1359,7 +1319,7 @@ static int mfc_resume(struct device *dev)
 	s5p_sysmmu_set_tablebase_pgd(dev, __pa(swapper_pg_dir));
 #endif
 
-	mfc_clock_off();
+	mfc_clock_off(mfcdev);
 #endif
 
 	mutex_lock(&m_dev->lock);
@@ -1402,7 +1362,7 @@ static int mfc_runtime_resume(struct device *dev)
 
 #ifdef SYSMMU_MFC_ON
 	if (pre_power == 0) {
-		mfc_clock_on();
+		mfc_clock_on(dev);
 
 		s5p_sysmmu_enable(dev);
 
@@ -1412,7 +1372,7 @@ static int mfc_runtime_resume(struct device *dev)
 		s5p_sysmmu_set_tablebase_pgd(dev, __pa(swapper_pg_dir));
 #endif
 
-		mfc_clock_off();
+		mfc_clock_off(dev);
 	}
 #endif
 
