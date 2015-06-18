@@ -15,6 +15,7 @@
 #include <media/v4l2-i2c-drv.h>
 #include <media/v4l2-chip-ident.h>
 #include <media/v4l2-ctrls.h>
+#include <linux/rtc.h>
 
 #include "tvp5150_reg.h"
 
@@ -26,6 +27,9 @@
 #include <mach/regs-gpio.h>
 #include <mach/regs-clock.h>
 /* end add */
+
+
+#include "tvp5150-patch.h"
 
 MODULE_DESCRIPTION("Texas Instruments TVP5150A video decoder driver");
 MODULE_AUTHOR("Mauro Carvalho Chehab");
@@ -89,13 +93,50 @@ struct tvp5150 {
 	int sat;
 };
 
+
+#if 0   //add by dg for debug tvp5150
+
+
+static int tvp5150_log_status(struct v4l2_subdev *sd);
+static int tvp5150_read(struct v4l2_subdev *sd, unsigned char addr);
+static struct timer_list timer_task;
+struct v4l2_subdev * g_sd=NULL;
+
+static int read_tvp5150_reg(struct v4l2_subdev *sd)
+{
+
+    if(sd==NULL)
+        return 0;
+
+    printk("start read tvp5150 reg ......\n");
+
+
+   printk("tvp5150: Status regs #1 to #5 = %02x %02x %02x %02x %02x\n",
+                   tvp5150_read(sd, TVP5150_STATUS_REG_1),
+                   tvp5150_read(sd, TVP5150_STATUS_REG_2),
+                   tvp5150_read(sd, TVP5150_STATUS_REG_3),
+                   tvp5150_read(sd, TVP5150_STATUS_REG_4),
+
+    printk("tvp5150 lines pre frame  MSB =%02x,LSB=%02x\n",           \
+                   tvp5150_read(g_sd,TVP5150_VERT_LN_COUNT_MSB),         \
+                   tvp5150_read(g_sd,TVP5150_VERT_LN_COUNT_LSB));
+
+    timer_task.expires = jiffies + 20*HZ;
+    add_timer(&timer_task);
+
+  return 0;
+
+}
+
+#endif
+
 /* add by cym 20140915 */
 #if 1
 struct regulator *tvp_vddaf_cam_regulator = NULL;
 struct regulator *tvp_vdd5m_cam_regulator = NULL;
 
 struct regulator *tvp_vdd18_cam_regulator = NULL;
-struct regulator *tvp_vdd28_cam_regulator = NULL;
+
 
 static int tvp5150_power(int flag)
 {
@@ -109,25 +150,17 @@ static int tvp5150_power(int flag)
         {
                 //poweron
 #ifndef CONFIG_TC4_EVT
-		regulator_enable(tvp_vdd18_cam_regulator);
+                regulator_enable(tvp_vdd18_cam_regulator); //DVDD 1.8v
+                udelay(10);
+
+                regulator_enable(tvp_vdd5m_cam_regulator); //PLL_AVDD  CH_AVDD 1.8V
                	udelay(10);
-                regulator_enable(tvp_vdd28_cam_regulator);
-               	udelay(10);
-                regulator_enable(tvp_vdd5m_cam_regulator); //DOVDD  DVDD 1.8v
-               	udelay(10);
-                regulator_enable(tvp_vddaf_cam_regulator);         //AVDD 2.8v
+
+                regulator_enable(tvp_vddaf_cam_regulator);         //IO_DVDD 3.3
                	udelay(10);
 #endif
-#if 0
-                //pwdn		GPF0_5: 2M PWDN
-                err = gpio_request(EXYNOS4_GPF0(5), "GPF0_5");
-                if (err)
-                        printk(KERN_ERR "#### failed to request GPF0_5 ####\n");
-                s3c_gpio_setpull(EXYNOS4_GPF0(5), S3C_GPIO_PULL_NONE);
-                gpio_direction_output(EXYNOS4_GPF0(5), 1);
-                gpio_free(EXYNOS4_GPF0(5));
-#endif
-                //pwdn1	GPF2_4: 5M PWDN
+
+                //pwdn	GPL0_3  PWDN
 #if 1
                 err = gpio_request(EXYNOS4_GPL0(3), "GPL0_3");
                 if (err)
@@ -150,42 +183,33 @@ static int tvp5150_power(int flag)
 
                 gpio_free(EXYNOS4_GPL0(1));
                 msleep(20);
+
+
         }
         else
         {
 #if 1
-			err = gpio_request(EXYNOS4_GPL0(1), "GPL0");
-			if (err)
-				printk(KERN_ERR "#### failed to request GPL0_1 ####\n");
-			s3c_gpio_setpull(EXYNOS4_GPL0(1), S3C_GPIO_PULL_NONE);
-			gpio_direction_output(EXYNOS4_GPL0(1), 0);
-			gpio_free(EXYNOS4_GPL0(1));
+            err = gpio_request(EXYNOS4_GPL0(1), "GPL0");
+            if (err)
+                printk(KERN_ERR "#### failed to request GPL0_1 ####\n");
+            s3c_gpio_setpull(EXYNOS4_GPL0(1), S3C_GPIO_PULL_NONE);
+            gpio_direction_output(EXYNOS4_GPL0(1), 0);
+            gpio_free(EXYNOS4_GPL0(1));
 #endif
-#if 0
-                //powerdown	GPF0_5: 2M PWDN
-                err = gpio_request(EXYNOS4_GPF0(5), "GPF0_5");
-                if (err)
-                        printk(KERN_ERR "#### failed to request GPE0_5 ####\n");
-                s3c_gpio_setpull(EXYNOS4_GPF0(5), S3C_GPIO_PULL_NONE);
-                gpio_direction_output(EXYNOS4_GPF0(5), 1);
-                gpio_free(EXYNOS4_GPF0(5));
-#endif
-		 //pwdn1			GPF2_4: 5M PWDN
-                err = gpio_request(EXYNOS4_GPL0(3), "GPL0_3");
-                if (err)
-                        printk(KERN_ERR "#### failed to request GPF2_4 ####\n");
-                s3c_gpio_setpull(EXYNOS4_GPL0(3), S3C_GPIO_PULL_NONE);
-                gpio_direction_output(EXYNOS4_GPL0(3), 0);
-                gpio_free(EXYNOS4_GPL0(3));
+            //pwdn1 GPL0_3:  PWDN
+            err = gpio_request(EXYNOS4_GPL0(3), "GPL0_3");
+            if (err)
+                printk(KERN_ERR "#### failed to request GPL0_3 ####\n");
+            s3c_gpio_setpull(EXYNOS4_GPL0(3), S3C_GPIO_PULL_NONE);
+            gpio_direction_output(EXYNOS4_GPL0(3), 0);
+            gpio_free(EXYNOS4_GPL0(3));
 #ifndef CONFIG_TC4_EVT
-                regulator_disable(tvp_vdd18_cam_regulator);
-               	udelay(10);
-                regulator_disable(tvp_vdd28_cam_regulator);
-               	udelay(10);
-                regulator_disable(tvp_vdd5m_cam_regulator);
-               	udelay(10);
-                regulator_disable(tvp_vddaf_cam_regulator);
-               	udelay(10);
+            regulator_disable(tvp_vdd18_cam_regulator);
+            udelay(10);
+            regulator_disable(tvp_vdd5m_cam_regulator);
+            udelay(10);
+            regulator_disable(tvp_vddaf_cam_regulator);
+            udelay(10);
 #endif
         }
 
@@ -214,7 +238,7 @@ static int tvp5150_read(struct v4l2_subdev *sd, unsigned char addr)
 	if (1 != (rc = i2c_master_recv(c, buffer, 1)))
 		v4l2_dbg(0, debug, sd, "i2c i/o error: rc == %d (should be 1)\n", rc);
 
-	v4l2_dbg(2, debug, sd, "tvp5150: read 0x%02x = 0x%02x\n", addr, buffer[0]);
+         v4l2_dbg(2, debug, sd, "tvp5150: read 0x%02x = 0x%02x\n", addr, buffer[0]);
 
 	return (buffer[0]);
 }
@@ -232,7 +256,28 @@ static inline void tvp5150_write(struct v4l2_subdev *sd, unsigned char addr,
 	if (2 != (rc = i2c_master_send(c, buffer, 2)))
 		v4l2_dbg(0, debug, sd, "i2c i/o error: rc == %d (should be 2)\n", rc);
 }
+static inline void tvp5150_write_buf(struct v4l2_subdev *sd, unsigned char addr,int nNumBytes,
+                                 unsigned char* value)
+{
+        struct i2c_client *c = v4l2_get_subdevdata(sd);
+        int rc;
 
+        unsigned char* buffer = kmalloc(PATCHDATASIZE+1,GFP_KERNEL);
+
+        memset(buffer,0,sizeof(buffer));
+
+        buffer[0] = addr;
+        memcpy(buffer+1,value,nNumBytes);
+
+        printk("tvp5150: writing patch addr 0x%02x len %02d  bytes\n", buffer[0], nNumBytes);
+
+        if (2 != (rc = i2c_master_send(c, buffer, nNumBytes+1)))
+                v4l2_dbg(0, debug, sd, "i2c i/o error: rc == %d (should be 2)\n", rc);
+
+        kfree(buffer);
+
+
+}
 static void dump_reg_range(struct v4l2_subdev *sd, char *s, u8 init,
 				const u8 end, int max_line)
 {
@@ -405,7 +450,7 @@ static inline void tvp5150_selmux(struct v4l2_subdev *sd)
 		input |= 2;
 		/* fall through */
 	case TVP5150_COMPOSITE0:
-		opmode=0x30;		/* TV Mode */
+                opmode=0x30;		/* TV Mode */
 		break;
 	case TVP5150_SVIDEO:
 	default:
@@ -414,7 +459,7 @@ static inline void tvp5150_selmux(struct v4l2_subdev *sd)
 		break;
 	}
 
-	v4l2_dbg(1, debug, sd, "Selecting video route: route input=%i, output=%i "
+        v4l2_dbg(1, debug, sd, "Selecting video route: route input=%i, output=%i "
 			"=> tvp5150 input=%i, opmode=%i\n",
 			decoder->input, decoder->output,
 			input, opmode);
@@ -587,11 +632,11 @@ static const struct i2c_reg_value tvp5150_init_enable[] = {
 	},{	/* Automatic offset and AGC enabled */
 		TVP5150_ANAL_CHL_CTL, 0x15
 	},{	/* Activate YCrCb output 0x9 or 0xd ? */
-		TVP5150_MISC_CTL, 0x6f
+                TVP5150_MISC_CTL, 0x4f   //dg change 0x6f  to 0x4f for disable INTREQ/GPCL/VBLK  pin 27
 	},{	/* Activates video std autodetection for all standards */
-		TVP5150_AUTOSW_MSK, 0x0
+                TVP5150_AUTOSW_MSK, 0x0
 	},{	/* Default format: 0x47. For 4:2:2: 0x40 */
-		TVP5150_DATA_RATE_SEL, 0x47
+                TVP5150_DATA_RATE_SEL, 0x40   //dg change 0x47 to 0x40 for discrete sync single
 	},{
 		TVP5150_CHROMA_PROC_CTL_1, 0x0c
 	},{
@@ -927,11 +972,13 @@ static int tvp5150_reset(struct v4l2_subdev *sd, u32 val)
 		}
 	}
 
+
 	/* Initializes TVP5150 to its default values */
 	tvp5150_write_inittab(sd, tvp5150_init_default);
 
+
 	/* Initializes VDP registers */
-	tvp5150_vdp_init(sd, vbi_ram_default);
+        tvp5150_vdp_init(sd, vbi_ram_default);
 
 	/* Selects decoder input */
 	tvp5150_selmux(sd);
@@ -948,7 +995,56 @@ static int tvp5150_reset(struct v4l2_subdev *sd, u32 val)
 	tvp5150_set_std(sd, decoder->norm);
 
 
-	tvp5150_log_status(sd);
+
+
+        tvp5150_log_status(sd);
+
+
+         udelay(20);
+
+#if 1   //updata firmware
+
+        printk("start download firmware patch...........\n");
+
+        tvp5150_write(sd, 0x7F, 0x00);//Restart TVP5150AM1
+        tvp5150_write(sd, 0x03, 0x4f); //Enable Outputs
+
+
+
+        // unlock password for patch code download & register write
+        tvp5150_write(sd, 0x21,0x51);
+        tvp5150_write(sd, 0x22,0x50);
+        tvp5150_write(sd, 0x23,0xFF);
+        tvp5150_write(sd, 0x24,0x04);
+
+        //This will write to slave address TVP5150AM1_ADDR, sub-address 0x7E
+        //(auto-incrementing data register) 'nNumBytes' bytes
+        //from buffer 'pData' in one continuous I2Ctransfer.
+        tvp5150_write_buf(sd,0x7E,sizeof(g_pData),g_pData);
+
+
+
+        tvp5150_write(sd, 0x7F,0x00);//Restart TVP5150AM1 CPU
+
+
+
+        // lock password for patch code download & register write
+        tvp5150_write(sd, 0x21,0x00);
+        tvp5150_write(sd, 0x22,0x00);
+        tvp5150_write(sd, 0x23,0xFF);
+        tvp5150_write(sd, 0x24,0x04);
+
+
+        printk("download firmware patch finished \n");
+
+
+        printk("tvp5150: ROM version = (hex) %02x.%02x\n",
+               tvp5150_read(sd, TVP5150_ROM_MAJOR_VER),
+               tvp5150_read(sd, TVP5150_ROM_MINOR_VER));
+
+
+
+#endif
 
 	return 0;
 };
@@ -1297,14 +1393,6 @@ static int tvp5150_probe(struct i2c_client *c,
                 goto err_regulator;
         }
 
-        tvp_vdd28_cam_regulator = regulator_get(NULL, "vdda28_2m");
-
-        if (IS_ERR(tvp_vdd28_cam_regulator)) {
-                printk("%s: failed to get %s\n", __func__, "vdda28_2m");
-                ret = -ENODEV;
-                goto err_regulator;
-        }
-
         tvp_vddaf_cam_regulator = regulator_get(NULL, "vdd28_af");
 
         if (IS_ERR(tvp_vddaf_cam_regulator)) {
@@ -1337,8 +1425,8 @@ static int tvp5150_probe(struct i2c_client *c,
 	v4l_info(c, "chip found @ 0x%02x (%s)\n",
 		 c->addr << 1, c->adapter->name);
 
-	core->norm = V4L2_STD_ALL;	/* Default is autodetect */
-	core->input = TVP5150_COMPOSITE0;
+        core->norm = V4L2_STD_ALL;//V4L2_STD_PAL; // dg test pal //V4L2_STD_ALL;	/* Default is autodetect */
+        core->input = TVP5150_COMPOSITE0;
 	core->enable = 1;
 	core->bright = 128;
 	core->contrast = 128;
@@ -1347,6 +1435,18 @@ static int tvp5150_probe(struct i2c_client *c,
 
 	if (debug > 1)
 		tvp5150_log_status(sd);
+
+
+#if 0  //add by dg  for debug tvp5150am1
+
+        init_timer(&timer_task);
+        timer_task.function = read_tvp5150_reg;
+        timer_task.data = sd;
+        timer_task.expires = jiffies + 10*HZ;
+        add_timer(&timer_task);
+#endif
+
+
 	return sysfs_create_group(&(c->dev.kobj), &tvp5150_attr_group);
 
 err_regulator:
@@ -1354,10 +1454,8 @@ err_regulator:
 
 	regulator_put(tvp_vddaf_cam_regulator);
         regulator_put(tvp_vdd5m_cam_regulator);
-
-        /* add by cym 20130506 */
         regulator_put(tvp_vdd18_cam_regulator);
-        regulator_put(tvp_vdd28_cam_regulator);
+
         /* end add */
 
         return ret;
@@ -1380,11 +1478,12 @@ static int tvp5150_remove(struct i2c_client *c)
 
         regulator_put(tvp_vddaf_cam_regulator);
         regulator_put(tvp_vdd5m_cam_regulator);
-
         regulator_put(tvp_vdd18_cam_regulator);
-        regulator_put(tvp_vdd28_cam_regulator);
 #endif
 
+#if  0
+        del_timer_sync(&timer_task);
+#endif
 	return 0;
 }
 
