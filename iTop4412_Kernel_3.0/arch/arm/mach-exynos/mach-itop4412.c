@@ -995,6 +995,15 @@ static struct s3c_sdhci_platdata smdk4x12_hsmmc3_pdata __initdata = {
 #endif
 
 
+// USB3503A, HSIC1 -> USB Host
+/* modify by cym 20130826 */
+#ifdef CONFIG_CPU_TYPE_SCP
+#define GPIO_HUB_RESET EXYNOS4212_GPM2(4)
+#define GPIO_HUB_CONNECT EXYNOS4212_GPM3(3)
+#else
+#define GPIO_HUB_RESET EXYNOS4_GPL2(2)
+#define GPIO_HUB_CONNECT EXYNOS4_GPK3(2)
+#endif
 
 //add by dg 2015-04-14
 #if defined(CONFIG_MTK_COMBO_MT66XX)
@@ -1008,8 +1017,6 @@ void setup_mt6620_wlan_power_for_onoff(int on)
 
     printk("[mt6620] +++ %s : wlan power %s\n",__func__, on?"on":"off");
 
-
-#if 1
     if (on) {
         outValue = 0;
     } else {
@@ -1024,19 +1031,6 @@ void setup_mt6620_wlan_power_for_onoff(int on)
         mdelay(100);
         gpio_free(EXYNOS4_GPX3(2));
     }
-
-    if(on)
-    {
-        //need reset on mt6620 ? need test......
-    }
-#endif
-
-    extern void sdhci_s3c_sdio_card_detect(struct platform_device *pdev);
-
-    // mdelay(200);
-
-    //need sdhc controler check wifi catd states......
-  //  sdhci_s3c_sdio_card_detect(&s3c_device_hsmmc3);
 
     printk("[mt6620] --- %s\n",__func__);
 
@@ -1180,15 +1174,7 @@ static void __init smdk4x12_ehci_init(void)
 
     s5p_ehci_set_platdata(pdata);
 }
-// USB3503A, HSIC1 -> USB Host
-/* modify by cym 20130826 */
-#ifdef CONFIG_CPU_TYPE_SCP
-#define GPIO_HUB_RESET EXYNOS4212_GPM2(4)
-#define GPIO_HUB_CONNECT EXYNOS4212_GPM3(3)
-#else
-#define GPIO_HUB_RESET EXYNOS4_GPL2(2)
-#define GPIO_HUB_CONNECT EXYNOS4_GPK3(2)
-#endif
+
 /* end modify */
 #ifndef CONFIG_TC4_DVT
 #ifndef CONFIG_CAN_MCP251X
@@ -1232,15 +1218,28 @@ void usb_hub_gpio_init(/*add by cym 20130426 */ void /* end add */)
 //dg add  macro '#ifdef CONFIG_CPU_TYPE_SCP' on 2015-05-20
 //pop coreboard on wifi mt6620 chip need that ,pop wifi/bluetooth use EXYNOS4_GPK3(2)  pin, it is more important.
 //on pop core board  EXYNOS4_GPK3(2) is used for mt6620 wifi chip and usb3503A usb hub too.  SCP  is not that.
-//on pop usb3503A is not needed must.
+//on pop usb3503A is  needed must.
 /*****************************************************************************************************************/
 // HUB_CONNECT
-#ifdef CONFIG_CPU_TYPE_SCP
+#ifndef CONFIG_CPU_TYPE_SCP //POP corebord
+#ifdef  CONFIG_MTK_COMBO_MT66XX    // wifi module
+
+     //do nothing  GPIO_HUB_CONNECT is input pin.
+#else
+       //usb hub work
         gpio_request(GPIO_HUB_CONNECT, "GPIO_HUB_CONNECT");
         gpio_direction_output(GPIO_HUB_CONNECT, 1);
         s3c_gpio_setpull(GPIO_HUB_CONNECT, S3C_GPIO_PULL_NONE);
         gpio_free(GPIO_HUB_CONNECT);
-#endif
+#endif//end CONFIG_MTK_COMBO_MT66XX
+#else //SCP core board
+        gpio_request(GPIO_HUB_CONNECT, "GPIO_HUB_CONNECT");
+        gpio_direction_output(GPIO_HUB_CONNECT, 1);
+        s3c_gpio_setpull(GPIO_HUB_CONNECT, S3C_GPIO_PULL_NONE);
+        gpio_free(GPIO_HUB_CONNECT);
+#endif //end CONFIG_CPU_TYPE_SCP
+
+
         flags = 1;
     }
 #ifndef CONFIG_TC4_DVT
@@ -3505,6 +3504,7 @@ static unsigned int tc4_sleep_gpio_table[][3] = {
     { EXYNOS4_GPK2(6),  S3C_GPIO_SLP_INPUT,	S3C_GPIO_PULL_NONE},	//TF_DATA3
 
     // dg change  for debug sdio wifi
+ #ifdef CONFIG_MTK_COMBO_MT66XX
     { EXYNOS4_GPK3(0),  S3C_GPIO_SLP_INPUT,	S3C_GPIO_PULL_NONE},	//WIFI_CLK
     { EXYNOS4_GPK3(1),  S3C_GPIO_SLP_INPUT,	S3C_GPIO_PULL_NONE},	//WIFI_CMD
     { EXYNOS4_GPK3(2),  S3C_GPIO_SLP_INPUT,	S3C_GPIO_PULL_DOWN},	//HUB_CONNECT
@@ -3512,6 +3512,7 @@ static unsigned int tc4_sleep_gpio_table[][3] = {
     { EXYNOS4_GPK3(4),  S3C_GPIO_SLP_INPUT,	S3C_GPIO_PULL_NONE},	//WIFI_DATA1
     { EXYNOS4_GPK3(5),  S3C_GPIO_SLP_INPUT,	S3C_GPIO_PULL_NONE},	//WIFI_DATA2
     { EXYNOS4_GPK3(6),  S3C_GPIO_SLP_INPUT,	S3C_GPIO_PULL_NONE},	//WIFI_DATA3
+#endif
 
     { EXYNOS4_GPL0(0),  S3C_GPIO_SLP_INPUT,	S3C_GPIO_PULL_DOWN},	//BUCK6_EN
     #ifdef CONFIG_TC4_EVT
@@ -3761,7 +3762,7 @@ static unsigned int tc4_sleep_gpio_table[][3] = {
     { EXYNOS4_GPK2(4),  S3C_GPIO_SLP_INPUT,	S3C_GPIO_PULL_NONE},	//TF_DATA1
     { EXYNOS4_GPK2(5),  S3C_GPIO_SLP_INPUT,	S3C_GPIO_PULL_NONE},	//TF_DATA2
     { EXYNOS4_GPK2(6),  S3C_GPIO_SLP_INPUT,	S3C_GPIO_PULL_NONE},	//TF_DATA3
-
+#ifdef CONFIG_MTK_COMBO_MT66XX
     { EXYNOS4_GPK3(0),  S3C_GPIO_SLP_PREV,	S3C_GPIO_PULL_NONE},	//WIFI_CLK
     { EXYNOS4_GPK3(1),  S3C_GPIO_SLP_PREV,	S3C_GPIO_PULL_NONE},	//WIFI_CMD
     { EXYNOS4_GPK3(2),  S3C_GPIO_SLP_INPUT,	S3C_GPIO_PULL_DOWN},	//HUB_CONNECT
@@ -3769,6 +3770,7 @@ static unsigned int tc4_sleep_gpio_table[][3] = {
     { EXYNOS4_GPK3(4),  S3C_GPIO_SLP_PREV,	S3C_GPIO_PULL_NONE},	//WIFI_DATA1
     { EXYNOS4_GPK3(5),  S3C_GPIO_SLP_PREV,	S3C_GPIO_PULL_NONE},	//WIFI_DATA2
     { EXYNOS4_GPK3(6),  S3C_GPIO_SLP_PREV,	S3C_GPIO_PULL_NONE},	//WIFI_DATA3
+#endif
 
     { EXYNOS4_GPL0(0),  S3C_GPIO_SLP_INPUT,	S3C_GPIO_PULL_NONE},	//BUCK6_EN
     #ifdef CONFIG_TC4_EVT

@@ -540,13 +540,27 @@ void s3cfb_late_resume(struct early_suspend *h)
         gpio_free(GPIO_HUB_RESET);
 
         // HUB_CONNECT
-#ifdef CONFIG_CPU_TYPE_SCP
+#ifndef CONFIG_CPU_TYPE_SCP //POP corebord
+#ifdef  CONFIG_MTK_COMBO_MT66XX    // wifi module
+
+     //do nothing:GPIO_HUB_CONNECT is input pin.
+#else
+       //usb hub work
         gpio_request(GPIO_HUB_CONNECT, "GPIO_HUB_CONNECT");
         gpio_direction_output(GPIO_HUB_CONNECT, 1);
         s3c_gpio_setpull(GPIO_HUB_CONNECT, S3C_GPIO_PULL_NONE);
         gpio_free(GPIO_HUB_CONNECT);
-#endif
-#endif
+#endif //end CONFIG_MTK_COMBO_MT66XX
+#else //SCP core board
+        gpio_request(GPIO_HUB_CONNECT, "GPIO_HUB_CONNECT");
+        gpio_direction_output(GPIO_HUB_CONNECT, 1);
+        s3c_gpio_setpull(GPIO_HUB_CONNECT, S3C_GPIO_PULL_NONE);
+        gpio_free(GPIO_HUB_CONNECT);
+#endif //end CONFIG_CPU_TYPE_SCP
+
+
+
+#endif //end 1
 
 	return;
 }

@@ -44,20 +44,18 @@ static int exynos_usbswitch_suspend(struct device *dev)
 	#define GPIO_HUB_CONNECT EXYNOS4212_GPM3(3)
 #else
 	#define GPIO_HUB_RESET EXYNOS4_GPL2(2)
-	//#define GPIO_HUB_CONNECT EXYNOS4_GPK3(2)
+        #define GPIO_HUB_CONNECT EXYNOS4_GPK3(2)
 #endif
         gpio_request(GPIO_HUB_RESET, "GPIO_HUB_RESET");
         gpio_direction_output(GPIO_HUB_RESET, 0);
         s3c_gpio_setpull(GPIO_HUB_RESET, S3C_GPIO_PULL_NONE);
         gpio_free(GPIO_HUB_RESET);
 
-        // HUB_CONNECT
-#ifdef CONFIG_CPU_TYPE_SCP
         gpio_request(GPIO_HUB_CONNECT, "GPIO_HUB_CONNECT");
         gpio_direction_output(GPIO_HUB_CONNECT, 0);
         s3c_gpio_setpull(GPIO_HUB_CONNECT, S3C_GPIO_PULL_NONE);
         gpio_free(GPIO_HUB_CONNECT);
-#endif
+
 #endif
 
 	return 0;
