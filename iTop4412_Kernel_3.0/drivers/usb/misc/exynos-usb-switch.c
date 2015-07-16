@@ -31,6 +31,15 @@
 
 static const char switch_name[] = "exynos_usb_Device";
 
+#ifdef CONFIG_CPU_TYPE_SCP
+        #define GPIO_HUB_RESET EXYNOS4212_GPM2(4)
+        #define GPIO_HUB_CONNECT EXYNOS4212_GPM3(3)
+#else
+        #define GPIO_HUB_RESET EXYNOS4_GPL2(2)
+        #define GPIO_HUB_CONNECT EXYNOS4_GPK3(2)
+#endif
+
+
 #ifdef CONFIG_PM
 static int exynos_usbswitch_suspend(struct device *dev)
 {
@@ -38,14 +47,35 @@ static int exynos_usbswitch_suspend(struct device *dev)
 
         udc->gadget.ops->vbus_session(&udc->gadget, 0);
 
-#if 1 //cym
-#ifdef CONFIG_CPU_TYPE_SCP
-	#define GPIO_HUB_RESET EXYNOS4212_GPM2(4)
-	#define GPIO_HUB_CONNECT EXYNOS4212_GPM3(3)
-#else
-	#define GPIO_HUB_RESET EXYNOS4_GPL2(2)
-        #define GPIO_HUB_CONNECT EXYNOS4_GPK3(2)
+
+#ifndef CONFIG_CPU_TYPE_SCP  //POP Coreboard    dg add 2015-07-16
+
+#if defined(CONFIG_MTK_COMBO_MT66XX)  //mt6620 chip
+
+        // Hub chip into standby mode  while reset pin  keep  low level
+        gpio_request(GPIO_HUB_RESET, "GPIO_HUB_RESET");
+        gpio_direction_output(GPIO_HUB_RESET, 0);
+        s3c_gpio_setpull(GPIO_HUB_RESET, S3C_GPIO_PULL_NONE);
+        gpio_free(GPIO_HUB_RESET);
+
+
+        //HubConnect pin turn to low level, leave the Hub Communication Stage mode
+        if (gpio_request(EXYNOS4_GPX3(2),  "6260_GPIO2")!=0) {
+            printk("[mt6620] ERROR:Cannot request 6260_GPIO2\n");
+        } else {
+            gpio_direction_output(EXYNOS4_GPX3(2), 0);/* WLAN_CHIP_PWD */
+            gpio_set_value(EXYNOS4_GPX3(2), 0);
+            mdelay(100);
+            gpio_free(EXYNOS4_GPX3(2));
+        }
+
+
+        return 0 ;
 #endif
+
+#endif //end pop Coreboard
+
+
         gpio_request(GPIO_HUB_RESET, "GPIO_HUB_RESET");
         gpio_direction_output(GPIO_HUB_RESET, 0);
         s3c_gpio_setpull(GPIO_HUB_RESET, S3C_GPIO_PULL_NONE);
@@ -56,7 +86,9 @@ static int exynos_usbswitch_suspend(struct device *dev)
         s3c_gpio_setpull(GPIO_HUB_CONNECT, S3C_GPIO_PULL_NONE);
         gpio_free(GPIO_HUB_CONNECT);
 
-#endif
+
+
+
 
 	return 0;
 }
@@ -64,6 +96,46 @@ static int exynos_usbswitch_suspend(struct device *dev)
 static int exynos_usbswitch_resume(struct device *dev)
 {
 	struct s3c_udc *udc = the_controller;
+
+
+#ifndef  CONFIG_CPU_TYPE_SCP  //POP Coreboard  dg add 2015-07-16
+
+#if defined(CONFIG_MTK_COMBO_MT66XX)
+
+        // level turn top ,hub leave standby mode
+        gpio_request(GPIO_HUB_RESET, "GPIO_HUB_RESET");
+        gpio_direction_output(GPIO_HUB_RESET, 1);
+        s3c_gpio_setpull(GPIO_HUB_RESET, S3C_GPIO_PULL_NONE);
+        gpio_free(GPIO_HUB_RESET);
+
+#if 0 //  if true,wifi cannot resume to work,why?
+
+        //HubConnect pin turn to top level, transition to the Hub Communication Stage
+        if (gpio_request(EXYNOS4_GPX3(2),  "6260_GPIO2")!=0) {
+            printk("[mt6620] ERROR:Cannot request 6260_GPIO2\n");
+        } else {
+            gpio_direction_output(EXYNOS4_GPX3(2), 1);/* WLAN_CHIP_PWD */
+            gpio_set_value(EXYNOS4_GPX3(2), 1);
+            mdelay(10);
+            gpio_free(EXYNOS4_GPX3(2));
+        }
+
+
+        //HubConnect pin turn to low level for wifi detect
+        if (gpio_request(EXYNOS4_GPX3(2),  "6260_GPIO2")!=0) {
+            printk("[mt6620] ERROR:Cannot request 6260_GPIO2\n");
+        } else {
+            gpio_direction_output(EXYNOS4_GPX3(2), 0);/* WLAN_CHIP_PWD */
+            gpio_set_value(EXYNOS4_GPX3(2), 0);
+            mdelay(10);
+            gpio_free(EXYNOS4_GPX3(2));
+        }
+#endif
+
+
+#endif
+
+#endif //end pop coreboard
 
 	printk("USB_DEVICE_ATTACHED\n");
 	udc->gadget.ops->vbus_session(&udc->gadget, 1);

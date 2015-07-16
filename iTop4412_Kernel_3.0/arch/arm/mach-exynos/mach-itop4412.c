@@ -1189,44 +1189,28 @@ void usb_hub_gpio_init(/*add by cym 20130426 */ void /* end add */)
 
     /* add by cym 20121114 */
     static char flags = 0;
-#if 0
-    //printk("%s: reset hub.\n");
-    gpio_request(GPIO_HUB_RESET, "GPIO_HUB_RESET");
-    gpio_direction_output(GPIO_HUB_RESET, 0);
-    s3c_gpio_setpull(GPIO_HUB_RESET, S3C_GPIO_PULL_NONE);
-    gpio_free(GPIO_HUB_RESET);
 
-    // HUB_CONNECT
-    gpio_request(GPIO_HUB_CONNECT, "GPIO_HUB_CONNECT");
-    gpio_direction_output(GPIO_HUB_CONNECT, 0);
-    s3c_gpio_setpull(GPIO_HUB_CONNECT, S3C_GPIO_PULL_NONE);
-    gpio_free(GPIO_HUB_CONNECT);
-    mdelay(500);
-#endif
-    /* end add */
-
-    /* remove by cym 20130326 */
-    //#ifdef CONFIG_HUB_DEVICE
 #if 1
-    if(0 == flags){
+    if(0 == flags)
+    {
         gpio_request(GPIO_HUB_RESET, "GPIO_HUB_RESET");
         gpio_direction_output(GPIO_HUB_RESET, 1);
         s3c_gpio_setpull(GPIO_HUB_RESET, S3C_GPIO_PULL_NONE);
         gpio_free(GPIO_HUB_RESET);
 
-/*****************************************************************************************************************/
-//dg add  macro '#ifdef CONFIG_CPU_TYPE_SCP' on 2015-05-20
-//pop coreboard on wifi mt6620 chip need that ,pop wifi/bluetooth use EXYNOS4_GPK3(2)  pin, it is more important.
-//on pop core board  EXYNOS4_GPK3(2) is used for mt6620 wifi chip and usb3503A usb hub too.  SCP  is not that.
-//on pop usb3503A is  needed must.
-/*****************************************************************************************************************/
-// HUB_CONNECT
+        /*****************************************************************************************************************/
+        //dg add  macro '#ifdef CONFIG_CPU_TYPE_SCP' on 2015-05-20
+        //pop coreboard on wifi mt6620 chip need that ,pop wifi/bluetooth use EXYNOS4_GPK3(2)  pin, it is more important.
+        //on pop core board  EXYNOS4_GPK3(2) is used for mt6620 wifi chip and usb3503A usb hub too.  SCP  is not that.
+        //on pop usb3503A is  needed must.
+        /*****************************************************************************************************************/
+        // HUB_CONNECT
 #ifndef CONFIG_CPU_TYPE_SCP //POP corebord
 #ifdef  CONFIG_MTK_COMBO_MT66XX    // wifi module
 
-     //do nothing  GPIO_HUB_CONNECT is input pin.
+        //do nothing  GPIO_HUB_CONNECT is input pin.
 #else
-       //usb hub work
+        //usb hub work
         gpio_request(GPIO_HUB_CONNECT, "GPIO_HUB_CONNECT");
         gpio_direction_output(GPIO_HUB_CONNECT, 1);
         s3c_gpio_setpull(GPIO_HUB_CONNECT, S3C_GPIO_PULL_NONE);
@@ -1537,7 +1521,7 @@ REGULATOR_INIT(ldo20, "VDD28_CAM", 2800000, 2800000, 0,
 /* modify by cym 20141106 */
 #ifdef CONFIG_VIDEO_TVP5150
 //REGULATOR_INIT(ldo21, "VDD28_AF", 3300000, 3300000, 0,
-  //             REGULATOR_CHANGE_STATUS, 1);
+//             REGULATOR_CHANGE_STATUS, 1);
 
 //dg change for tvp5150 IO_DVDD Pin10, datasheet show need 3.3V,but real 3.3v not work,why?
 REGULATOR_INIT(ldo21, "VDD28_AF", 1800000, 1800000, 0,
@@ -1895,8 +1879,8 @@ void setup_ft5x_width_height()
     else if(0x01 == type)	//7.0
     {
 #if defined(CONFIG_TOUCHSCREEN_FT5X0X)
-		ft5x0x_pdata.screen_max_x = 800;//1280;//1280;
-                ft5x0x_pdata.screen_max_y = 1280;//800;//800;
+        ft5x0x_pdata.screen_max_x = 800;//1280;//1280;
+        ft5x0x_pdata.screen_max_y = 1280;//800;//800;
 #endif
         ;
     }
@@ -2179,21 +2163,21 @@ static void __init smdk4x12_gpio_power_init(void)
     /* end add */
 
 #ifdef CONFIG_TOUCHSCREEN_TSC2007
-	int err = 0;
+    int err = 0;
 #if 0
-	err = gpio_request_one(EXYNOS4_GPL1(1), 0, "GPL1_1");
-        if (err) {
-                printk(KERN_ERR "failed to request GPL1_1 for "
-                                "4.3 LCD backlight\n");
-                return;
-        }
+    err = gpio_request_one(EXYNOS4_GPL1(1), 0, "GPL1_1");
+    if (err) {
+        printk(KERN_ERR "failed to request GPL1_1 for "
+                        "4.3 LCD backlight\n");
+        return;
+    }
 
     s3c_gpio_setpull(EXYNOS4_GPL1(1), S3C_GPIO_PULL_UP);
 
     gpio_set_value(EXYNOS4_GPL1(1), 1);
 
-        gpio_free(EXYNOS4_GPL1(1));
-	mdelay(5);
+    gpio_free(EXYNOS4_GPL1(1));
+    mdelay(5);
 #endif
 #if 0
     err = gpio_request_one(EXYNOS4_GPC0(2), 0, "GPC0_2");
@@ -3509,7 +3493,7 @@ static unsigned int tc4_sleep_gpio_table[][3] = {
     { EXYNOS4_GPK2(6),  S3C_GPIO_SLP_INPUT,	S3C_GPIO_PULL_NONE},	//TF_DATA3
 
     // dg change  for debug sdio wifi
- #ifdef CONFIG_MTK_COMBO_MT66XX
+    #ifdef CONFIG_MTK_COMBO_MT66XX
     { EXYNOS4_GPK3(0),  S3C_GPIO_SLP_INPUT,	S3C_GPIO_PULL_NONE},	//WIFI_CLK
     { EXYNOS4_GPK3(1),  S3C_GPIO_SLP_INPUT,	S3C_GPIO_PULL_NONE},	//WIFI_CMD
     { EXYNOS4_GPK3(2),  S3C_GPIO_SLP_INPUT,	S3C_GPIO_PULL_DOWN},	//HUB_CONNECT
@@ -3517,7 +3501,7 @@ static unsigned int tc4_sleep_gpio_table[][3] = {
     { EXYNOS4_GPK3(4),  S3C_GPIO_SLP_INPUT,	S3C_GPIO_PULL_NONE},	//WIFI_DATA1
     { EXYNOS4_GPK3(5),  S3C_GPIO_SLP_INPUT,	S3C_GPIO_PULL_NONE},	//WIFI_DATA2
     { EXYNOS4_GPK3(6),  S3C_GPIO_SLP_INPUT,	S3C_GPIO_PULL_NONE},	//WIFI_DATA3
-#endif
+    #endif
 
     { EXYNOS4_GPL0(0),  S3C_GPIO_SLP_INPUT,	S3C_GPIO_PULL_DOWN},	//BUCK6_EN
     #ifdef CONFIG_TC4_EVT
@@ -3767,7 +3751,7 @@ static unsigned int tc4_sleep_gpio_table[][3] = {
     { EXYNOS4_GPK2(4),  S3C_GPIO_SLP_INPUT,	S3C_GPIO_PULL_NONE},	//TF_DATA1
     { EXYNOS4_GPK2(5),  S3C_GPIO_SLP_INPUT,	S3C_GPIO_PULL_NONE},	//TF_DATA2
     { EXYNOS4_GPK2(6),  S3C_GPIO_SLP_INPUT,	S3C_GPIO_PULL_NONE},	//TF_DATA3
-#ifdef CONFIG_MTK_COMBO_MT66XX
+    #ifdef CONFIG_MTK_COMBO_MT66XX
     { EXYNOS4_GPK3(0),  S3C_GPIO_SLP_PREV,	S3C_GPIO_PULL_NONE},	//WIFI_CLK
     { EXYNOS4_GPK3(1),  S3C_GPIO_SLP_PREV,	S3C_GPIO_PULL_NONE},	//WIFI_CMD
     { EXYNOS4_GPK3(2),  S3C_GPIO_SLP_INPUT,	S3C_GPIO_PULL_DOWN},	//HUB_CONNECT
@@ -3775,7 +3759,7 @@ static unsigned int tc4_sleep_gpio_table[][3] = {
     { EXYNOS4_GPK3(4),  S3C_GPIO_SLP_PREV,	S3C_GPIO_PULL_NONE},	//WIFI_DATA1
     { EXYNOS4_GPK3(5),  S3C_GPIO_SLP_PREV,	S3C_GPIO_PULL_NONE},	//WIFI_DATA2
     { EXYNOS4_GPK3(6),  S3C_GPIO_SLP_PREV,	S3C_GPIO_PULL_NONE},	//WIFI_DATA3
-#endif
+    #endif
 
     { EXYNOS4_GPL0(0),  S3C_GPIO_SLP_INPUT,	S3C_GPIO_PULL_NONE},	//BUCK6_EN
     #ifdef CONFIG_TC4_EVT
