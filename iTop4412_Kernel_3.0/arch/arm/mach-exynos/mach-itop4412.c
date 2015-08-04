@@ -393,7 +393,7 @@ static void __init dm9620_reset(void)
     s3c_gpio_setpull(EXYNOS4_GPC0(1), S3C_GPIO_PULL_UP);
     gpio_set_value(EXYNOS4_GPC0(1), 0);
 
-    mdelay(5);
+    mdelay(1000);//dg change 5 ms to 1000ms for test dm9621
 
     gpio_set_value(EXYNOS4_GPC0(1), 1);
     gpio_free(EXYNOS4_GPC0(1));
