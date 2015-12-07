@@ -168,7 +168,7 @@ static struct clk *mali_clock		= NULL;
 /* Pegasus */
 static const mali_bool bis_vpll = MALI_TRUE;
 int mali_gpu_clk = 440;
-int mali_gpu_vol = 1025000;
+int mali_gpu_vol = 1162500;//1137500;//1125000;//1025000;
 #else
 /* Orion */
 static const mali_bool bis_vpll = MALI_FALSE;
@@ -183,7 +183,7 @@ static int bPoweroff;
 static atomic_t clk_active;
 
 #ifdef CONFIG_REGULATOR
-//struct regulator *g3d_regulator = NULL;
+struct regulator *g3d_regulator = NULL;
 #endif
 
 mali_io_address clk_register_map = 0;
@@ -221,15 +221,15 @@ void mali_regulator_enable(void)
 void mali_regulator_set_voltage(int min_uV, int max_uV)
 {
 	_mali_osk_mutex_wait(mali_dvfs_lock);
-/*	if(IS_ERR_OR_NULL(g3d_regulator))
+	if(IS_ERR_OR_NULL(g3d_regulator))
 	{
 		MALI_DEBUG_PRINT(1, ("error on mali_regulator_set_voltage : g3d_regulator is null\n"));
 		return;
-	}*/
+	}
 	MALI_PRINT(("= regulator_set_voltage: %d, %d \n",min_uV, max_uV));
-/*	regulator_set_voltage(g3d_regulator, min_uV, max_uV);
+	regulator_set_voltage(g3d_regulator, min_uV, max_uV);
 	mali_gpu_vol = regulator_get_voltage(g3d_regulator);
-	MALI_DEBUG_PRINT(1, ("Mali voltage: %d\n", mali_gpu_vol));*/
+	MALI_DEBUG_PRINT(1, ("Mali voltage: %d\n", mali_gpu_vol));
 	_mali_osk_mutex_signal(mali_dvfs_lock);
 }
 #endif
@@ -748,7 +748,7 @@ static mali_bool init_mali_clock(void)
 	MALI_PRINT(("init_mali_clock mali_clock %x\n", mali_clock));
 
 #ifdef CONFIG_REGULATOR
-/*	g3d_regulator = regulator_get(NULL, "vdd_g3d");
+	g3d_regulator = regulator_get(NULL, "vdd_g3d");
 
 	if (IS_ERR(g3d_regulator))
 	{
@@ -758,7 +758,7 @@ static mali_bool init_mali_clock(void)
 	}
 
 	regulator_enable(g3d_regulator);
-	mali_regulator_set_voltage(mali_gpu_vol, mali_gpu_vol);*/
+	mali_regulator_set_voltage(mali_gpu_vol, mali_gpu_vol);
 #endif
 
 #if defined(CONFIG_MALI400_PROFILING)
@@ -773,8 +773,8 @@ static mali_bool init_mali_clock(void)
 	return MALI_TRUE;
 
 #ifdef CONFIG_REGULATOR
-/*err_regulator:
-	regulator_put(g3d_regulator);*/
+err_regulator:
+	regulator_put(g3d_regulator);
 #endif
 err_clk:
 	mali_clk_put(MALI_TRUE);

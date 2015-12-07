@@ -5,31 +5,6 @@
 #
 # Licensed under GPLv2
 
-exec := $(shell if [ -f $(src)/asv-4210.o ]; then rm $(src)/asv-4210.o; fi )
-exec := $(shell if [ -f $(src)/asv-4x12.o ]; then rm $(src)/asv-4x12.o; fi )
-exec := $(shell if [ -f $(src)/asv.o ]; then rm $(src)/asv.o; fi )
-exec := $(shell if [ -f $(src)/built-in.o ]; then rm $(src)/built-in.o; fi )
-exec := $(shell if [ -f $(src)/busfreq_opp_4x12.o ]; then rm $(src)/busfreq_opp_4x12.o; fi )
-exec := $(shell if [ -f $(src)/busfreq_opp.o ]; then rm $(src)/busfreq_opp.o; fi )
-exec := $(shell if [ -f $(src)/cpufreq-4x12.o ]; then rm $(src)/cpufreq-4x12.o; fi )
-exec := $(shell if [ -f $(src)/dev.o ]; then rm $(src)/dev.o; fi )
-exec := $(shell if [ -f $(src)/dynamic-dvfs-nr_running-hotplug.o ]; then rm $(src)/dynamic-dvfs-nr_running-hotplug.o; fi )
-exec := $(shell if [ -f $(src)/pm-exynos4.o ]; then rm $(src)/pm-exynos4.o; fi )
-exec := $(shell if [ -f $(src)/sleep-exynos4.o ]; then rm $(src)/sleep-exynos4.o; fi )
-
-ifeq ($(CONFIG_CPU_TYPE_SCP),y)
-TAR_FILE="binary/sleep/scp/sleep_scp.tgz"
-else
-TAR_FILE="binary/sleep/pop/sleep_pop.tgz"
-#TAR_FILE="binary/sleep/pop/sleep.tar.gz"
-endif
-
-#ifneq ($(CONFIG_CPU_TYPE_SCP),y)
-#TAR_FILE="binary/sleep/pop/sleep_pop.tar.gz"
-#endif
-
-exec := $(shell if [ -f $(TAR_FILE) ]; then tar -zxf $(TAR_FILE) -C $(src); fi )
-
 obj-y				:= reserve_mem-exynos4.o
 obj-m				:=
 obj-n				:=

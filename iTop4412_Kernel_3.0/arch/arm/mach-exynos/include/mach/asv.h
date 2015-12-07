@@ -20,7 +20,7 @@
 #define LOOP_CNT			10
 
 /* modify by cym 20130318 for 4412 SCP */
-#ifdef CONFIG_CPU_TYPE_SCP
+#if defined(CONFIG_CPU_TYPE_SCP_ELITE) || defined(CONFIG_CPU_TYPE_SCP_SUPPER) || defined(CONFIG_CPU_TYPE_POP2G_ELITE) || defined(CONFIG_CPU_TYPE_POP2G_SUPPER)
 #define MIF_LOCK_FLAG			0
 #define INT_LOCK_FLAG			1
 #define G3D_LOCK_FLAG			2
@@ -72,7 +72,7 @@ static inline void exynos4x12_set_abb(unsigned int abb_mode_value)
 
 	tmp |= abb_mode_value;
 	
-	printk("************ %s:0x%x, 0x%x, 0x%x, 0x%x, 0x%x\n", __FUNCTION__,
+	printk("%s:0x%x, 0x%x, 0x%x, 0x%x, 0x%x\n", __FUNCTION__,
                         __raw_readl(S5P_ABB_INT),
                         __raw_readl(S5P_ABB_MIF),
                         __raw_readl(S5P_ABB_G3D),

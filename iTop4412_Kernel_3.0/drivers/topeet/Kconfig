@@ -2,12 +2,63 @@ menu "TOPEET COMPANY DECIDE CPU TYPE"
 #
 # COMBO chip configuration
 #
-config CPU_TYPE_SCP
-	bool "CPU type support 4412 SCP"
+config CPU_TYPE_SCP_ELITE
+	bool "CPU type support 4412 SCP ELITE"
 	default y
 	help
-	  select cpu type, if select support 4412 SCP, 
-	  else support 4412 POP
+	  select cpu type, if select support 4412 SCP ELITE
+	  
+config CPU_TYPE_SCP_SUPPER
+	bool "CPU type support 4412 SCP SUPPER"
+	default y
+	help
+	  select cpu type, if select support 4412 SCP SUPPER
+
+	default y
+	help
+	  select cpu type, if select support 4412 SCP SUPPER
+	  
+config CPU_TYPE_POP_ELITE
+	bool "CPU type support 4412 POP ELITE"
+	default y
+	help
+	  select cpu type, if select support 4412 POP ELITE
+
+	default y
+	help
+	  select cpu type, if select support 4412 POP ELITE
+	  
+config CPU_TYPE_POP_SUPPER
+	bool "CPU type support 4412 POP SUPPER"
+	default y
+	help
+	  select cpu type, if select support 4412 POP SUPPER
+
+
+	default y
+	help
+	  select cpu type, if select support 4412 POP SUPPER
+
+config CPU_TYPE_POP2G_ELITE
+	bool "CPU type support 4412 POP 2G DDR ELITE"
+	default y
+	help
+	  select cpu type, if select support 4412 POP 2G DDR ELITE
+
+	default y
+	help
+	  select cpu type, if select support 4412 POP 2G DDR ELITE
+	  
+config CPU_TYPE_POP2G_SUPPER
+	bool "CPU type support 4412 POP 2G DDR SUPPER"
+	default y
+	help
+	  select cpu type, if select support 4412 POP 2G DDR SUPPER
+
+
+	default y
+	help
+	  select cpu type, if select support 4412 POP 2G DDR  SUPPER	  
 
 endmenu
 
