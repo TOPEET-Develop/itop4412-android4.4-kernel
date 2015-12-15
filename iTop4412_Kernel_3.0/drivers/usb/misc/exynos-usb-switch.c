@@ -31,7 +31,8 @@
 
 static const char switch_name[] = "exynos_usb_Device";
 
-#ifdef CONFIG_CPU_TYPE_SCP
+//#ifdef CONFIG_CPU_TYPE_SCP
+#if defined(CONFIG_CPU_TYPE_SCP_ELITE) || defined(CONFIG_CPU_TYPE_SCP_SUPPER)
         #define GPIO_HUB_RESET EXYNOS4212_GPM2(4)
         #define GPIO_HUB_CONNECT EXYNOS4212_GPM3(3)
 #else

@@ -997,7 +997,8 @@ static struct s3c_sdhci_platdata smdk4x12_hsmmc3_pdata __initdata = {
 
 // USB3503A, HSIC1 -> USB Host
 /* modify by cym 20130826 */
-#ifdef CONFIG_CPU_TYPE_SCP
+//#ifdef CONFIG_CPU_TYPE_SCP
+#if defined(CONFIG_CPU_TYPE_SCP_ELITE) || defined(CONFIG_CPU_TYPE_SCP_SUPPER)
 #define GPIO_HUB_RESET EXYNOS4212_GPM2(4)
 #define GPIO_HUB_CONNECT EXYNOS4212_GPM3(3)
 #else
@@ -1205,7 +1206,8 @@ void usb_hub_gpio_init(/*add by cym 20130426 */ void /* end add */)
         //on pop usb3503A is  needed must.
         /*****************************************************************************************************************/
         // HUB_CONNECT
-#ifndef CONFIG_CPU_TYPE_SCP //POP corebord
+//#ifndef CONFIG_CPU_TYPE_SCP //POP corebord
+#if !defined(CONFIG_CPU_TYPE_SCP_ELITE) && !defined(CONFIG_CPU_TYPE_SCP_SUPPER)
 #ifdef  CONFIG_MTK_COMBO_MT66XX    // wifi module
 
         //do nothing  GPIO_HUB_CONNECT is input pin.
