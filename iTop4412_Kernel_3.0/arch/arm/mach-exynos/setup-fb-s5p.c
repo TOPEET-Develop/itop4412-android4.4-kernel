@@ -428,6 +428,18 @@ int s3cfb_backlight_on(struct platform_device *pdev)
 	printk("(%s, %d): VGA_EN_ON\n", __FUNCTION__, __LINE__);
 	/* end add */
 
+	err = gpio_request(EXYNOS4_GPL0(4), "BK_VDD_EN");
+        if (err) {
+                printk(KERN_ERR "failed to request BK_VDD_EN\n");
+                //return err;
+        }
+
+        gpio_direction_output(EXYNOS4_GPL0(4), 1);
+        s3c_gpio_cfgpin(EXYNOS4_GPL0(4), S3C_GPIO_OUTPUT);
+        gpio_free(EXYNOS4_GPL0(4));
+
+        printk("(%s, %d): BK_VDD_ON\n", __FUNCTION__, __LINE__);
+
 	return 0;
 }
 
